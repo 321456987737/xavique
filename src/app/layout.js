@@ -1,6 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-
+import Navbar from "@/components/main/navbar/navbar";
 export const metadata = {
   icons:{
     icon: "/xaviquesm.png"
@@ -13,6 +13,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body >
+        <Navbar />
         {children}
       </body>
     </html>
