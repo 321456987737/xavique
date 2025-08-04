@@ -59,7 +59,7 @@ export default function FadeCarousel() {
                 className="w-full h-full object-cover"
                 loading={index === 0 ? "eager" : "lazy"}
               />
-              <div className="absolute inset-0 bg-black/60" />
+              <div className="absolute inset-0 bg-black/50" />
             </div>
           ))}
         </div>
@@ -68,14 +68,14 @@ export default function FadeCarousel() {
       {/* Navigation buttons */}
       <button
         onClick={scrollPrev}
-        className="absolute top-1/2 left-4 transform -translate-y-1/2 z-20 p-3 rounded-full bg-black/60 text-white hover:bg-black/80 transition-all duration-200"
+        className="absolute top-1/2 left-4 cursor-pointer p-3 rounded-full bg-black/80 text-white hover:bg-black/60 transition-all duration-200 transform -translate-y-1/2 z-20"
         aria-label="Previous slide"
       >
         <ChevronLeft className="w-6 h-6" />
       </button>
       <button
         onClick={scrollNext}
-        className="absolute top-1/2 right-4 transform -translate-y-1/2 z-20 p-3 rounded-full bg-black/60 text-white hover:bg-black/80 transition-all duration-200"
+        className="absolute top-1/2 right-4 cursor-pointer rounded-full bg-black/80 text-white hover:bg-black/60 transition-all duration-200 transform -translate-y-1/2 z-20 p-3 "
         aria-label="Next slide"
       >
         <ChevronRight className="w-6 h-6" />
