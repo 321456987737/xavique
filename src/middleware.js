@@ -1,12 +1,15 @@
-// middleware.ts
-import { NextResponse } from 'next/server';
+import { withAuth } from "next-auth/middleware";
 
-export function middleware(request) {
-  // This middleware does not modify or block anything.
-  return NextResponse.next();
-}
+export default withAuth({
+  callbacks: {
+    authorized: ({ req, token }) => !!token
+  },
+});
 
-// Optionally define which paths it should run on
 export const config = {
-  matcher: ['/((?!api|_next|.*\\..*).*)'], // apply to all routes, ignore static, _next, and API
+  matcher: [
+    "/collection/:path*",
+    "/profile/:path*",
+    // Add other protected routes
+  ]
 };
