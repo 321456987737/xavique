@@ -22,39 +22,51 @@ export const authOptions = {
         // username: { label: "Username", type: "text" },
       },
       async authorize(credentials, req) {
-        if (!credentials.email || !credentials.password ) {
-          throw new Error("Email and password are required");
+        // Validate input credentials
+        if (!credentials?.email || !credentials?.password) {
+          console.error("Missing credentials:", {
+            hasEmail: !!credentials?.email,
+            hasPassword: !!credentials?.password
+          });
+          return null; // Return null instead of throwing error for better NextAuth handling
         }
+
         try {
+          // Connect to database
           await dbConnect();
+          console.log("Database connected successfully");
         
-          const user = await User.findOne({ email: credentials.email });
+          // Find user by email
+          const user = await User.findOne({ email: credentials.email.toLowerCase().trim() });
+          console.log("User lookup result:", { found: !!user, email: credentials.email });
         
           if (!user) {
-            throw new Error("Invalid email or password");
+            console.error("User not found for email:", credentials.email);
+            return null; // Return null for invalid credentials
           }
 
+          // Verify password
           const isValid = await user.comparePassword(credentials.password);
+          console.log("Password validation result:", { isValid });
+          
           if (!isValid) {
-            throw new Error("Invalid email or password");
+            console.error("Invalid password for user:", credentials.email);
+            return null; // Return null for invalid credentials
           }
           
+          // Return user object for successful authentication
+          console.log("Authentication successful for user:", user.email);
           return {
-            id: user._id,
+            id: user._id.toString(),
             email: user.email,
             username: user.username,
           };
         } catch (error) {
           console.error("Authorization error:", error);
           
-          // Re-throw known errors to preserve their messages
-          if (error.message === "Invalid email or password" ||
-              error.message === "Email and password are required") {
-            throw error;
-          }
-          
-          // For unknown errors, throw a generic message
-          throw new Error("Authentication failed");
+          // Return null for any database or system errors
+          // This will trigger CredentialsSignin error in NextAuth
+          return null;
         }
       },
     }),
@@ -87,6 +99,11 @@ export const authOptions = {
   pages: {
     signIn: "/signin",
     error: "/signin", // Error code passed in query string as ?error=
+  },
+  events: {
+    async signIn({ user, account, profile, isNewUser }) {
+      // This event is called when sign in is successful
+    },
   },
   session: {
     strategy: "jwt",

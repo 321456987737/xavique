@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -16,9 +16,33 @@ const signInSchema = z.object({
 
 export default function SignIn() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+
+  // Check for URL error parameters on component mount
+  useEffect(() => {
+    const urlError = searchParams.get('error');
+    if (urlError) {
+      switch (urlError) {
+        case 'CredentialsSignin':
+          setError('Invalid email or password. Please check your credentials and try again.');
+          break;
+        case 'Configuration':
+          setError('There is a problem with the server configuration.');
+          break;
+        case 'AccessDenied':
+          setError('Access denied. You do not have permission to sign in.');
+          break;
+        case 'Verification':
+          setError('The verification token has expired or has already been used.');
+          break;
+        default:
+          setError('An error occurred during sign in. Please try again.');
+      }
+    }
+  }, [searchParams]);
 
   const {
     register,
@@ -31,6 +55,7 @@ export default function SignIn() {
   const onSubmit = async (data) => {
     setLoading(true);
     setError("");
+    
     try {
       const result = await signIn("credentials", {
         redirect: false,
@@ -41,14 +66,29 @@ export default function SignIn() {
       if (result?.ok) {
         router.push("/collection");
       } else if (result?.error) {
-        if (result.error === "CredentialsSignin") {
-          setError("Invalid email or password.");
-        } else {
-          setError("Something went wrong. Please try again.");
+        // Handle different types of authentication errors
+        switch (result.error) {
+          case 'CredentialsSignin':
+            setError("Invalid email or password. Please check your credentials and try again.");
+            break;
+          case 'Configuration':
+            setError("There is a problem with the server configuration. Please contact support.");
+            break;
+          case 'AccessDenied':
+            setError("Access denied. You do not have permission to sign in.");
+            break;
+          case 'Verification':
+            setError("The verification token has expired or has already been used.");
+            break;
+          default:
+            setError(`Authentication failed: ${result.error}`);
         }
+      } else {
+        setError("An unexpected error occurred. Please try again.");
       }
     } catch (err) {
-      setError("An error occurred. Please try again.");
+      console.error("Sign in error:", err);
+      setError("A network error occurred. Please check your connection and try again.");
     } finally {
       setLoading(false);
     }

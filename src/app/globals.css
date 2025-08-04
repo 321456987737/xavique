@@ -7,6 +7,11 @@
   --color-tertiary: #2E2E2E;
   --color-danger: #5A1A17;
 } */
+ body{
+  background-color: #2E2E2E;
+  height: 100%;
+  width: 100%;
+ }
 .embla__container {
   position: relative;
   height: 100%;
