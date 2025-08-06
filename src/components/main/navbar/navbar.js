@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import React, { useState } from "react";
 import Link from "next/link";
-import Filterfromnavbar from "./filterfromnavbar";
+import FullScreenCategoryMenu from "./filterfromnavbar";
 import Searchbar from "./search";
 import Rightsection from "./rightsection";
 import { Menu, Search } from "lucide-react";
@@ -21,44 +21,39 @@ const Navbar = () => {
 
   return (
     <>
-      {/* Main Navbar */}
       <motion.nav
-        className="h-[80px] sticky top-0 bg-gradient-to-r from-[#0A0A0A] via-[#1A1A1A] to-[#0A0A0A] backdrop-blur-md border-b border-[#D4AF37]/20 w-full text-white z-50 flex items-center px-8 shadow-2xl"
+        className="h-[80px] sticky top-0 bg-gradient-to-r from-[#0A0A0A] via-[#1A1A1A] to-[#0A0A0A] backdrop-blur-md border-b border-[#D4AF37]/20 w-full text-white z-50 flex items-center px-4 md:px-8 shadow-2xl"
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
-        {/* Left Section - Menu Button */}
-        <div className="flex items-center min-w-[200px]">
+        <div className="flex items-center w-1/3 md:min-w-[200px]">
           <motion.button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="group relative p-3 rounded-full hover:bg-[#D4AF37]/10 transition-all duration-300"
+            className="group relative p-2 md:p-3 rounded-full hover:bg-[#D4AF37]/10 transition-all duration-300"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
             <Menu
               size={24}
-              className="text-white group-hover:text-[#D4AF37] transition-colors duration-300"
-              onClick={() => setIsMenuOpen(true)}
+              className="text-white md:w-[24px] md:h-[24px] h-[20px] w-[20px] group-hover:text-[#D4AF37] transition-colors duration-300"
             />
             <div className="absolute inset-0 rounded-full bg-[#D4AF37]/20 scale-0 group-hover:scale-100 transition-transform duration-300" />
           </motion.button>
 
-          {/* Search Icon */}
           <motion.button
-            onClick={() => setIsSearchOpen(!isSearchOpen)}
-            className="group relative p-3 ml-4 rounded-full hover:bg-[#D4AF37]/10 transition-all duration-300"
+            onClick={() => setIsSearchOpen(true)}
+            className="group relative p-2 ml-2 md:ml-4 rounded-full hover:bg-[#D4AF37]/10 transition-all duration-300"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
             <Search
               size={22}
-              className="text-white group-hover:text-[#D4AF37] transition-colors duration-300"
+              className="text-white md:w-[22px] md:h-[22px] h-[18px] w-[18px] group-hover:text-[#D4AF37] transition-colors duration-300"
             />
             <div className="absolute inset-0 rounded-full bg-[#D4AF37]/20 scale-0 group-hover:scale-100 transition-transform duration-300" />
           </motion.button>
         </div>
 
-        {/* Center - Logo */}
-        <div className="absolute left-1/2 transform -translate-x-1/2">
+        <div className="absolute left-1/2 transform -translate-x-1/2 w-[100px] md:w-auto">
           <Link href="/" className="group">
             <motion.div
               whileHover={{ scale: 1.05 }}
@@ -68,54 +63,24 @@ const Navbar = () => {
               <img
                 src="/xavique.png"
                 alt="Xavique Logo"
-                className="h-[50px] object-contain filter brightness-110 group-hover:brightness-125 transition-all duration-300"
+                className="h-[40px] md:h-[50px] object-contain filter brightness-110 group-hover:brightness-125 transition-all duration-300"
               />
               <div className="absolute inset-0 bg-gradient-to-r from-[#D4AF37]/0 via-[#D4AF37]/10 to-[#D4AF37]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg" />
             </motion.div>
           </Link>
         </div>
 
-        {/* Right Section */}
-        <div className="flex items-center ml-auto min-w-[200px] justify-end">
+        <div className="flex items-center ml-auto w-1/3 md:min-w-[200px] justify-end">
           <Rightsection />
         </div>
       </motion.nav>
 
-      {/* Filter Menu Overlay */}
       <AnimatePresence>
         {isMenuOpen && (
-          <AnimatePresence>
-            <>
-              {/* <motion.div
-                key="backdrop"
-                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={() => setIsMenuOpen(false)}
-              />
-
-              <motion.div
-                key="menu-panel"
-                className="fixed top-[80px] left-0 w-full bg-gradient-to-b from-[#0A0A0A] to-[#1A1A1A] border-b border-[#D4AF37]/30 z-50 shadow-2xl"
-                initial={{ x: -100, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                exit={{ x: -100, opacity: 0 }}
-                transition={{ duration: 0.4, ease: "easeOut" }}
-              > */}
-                {/* <div className="px-8 py-6"> */}
-                  <Filterfromnavbar
-                    isOpen={isMenuOpen}
-                    onClose={() => setIsMenuOpen(false)}
-                  />
-                {/* </div> */}
-              {/* </motion.div> */}
-            </>
-          </AnimatePresence>
+          <FullScreenCategoryMenu onClose={() => setIsMenuOpen(false)} />
         )}
       </AnimatePresence>
 
-      {/* Search Overlay */}
       <AnimatePresence>
         {isSearchOpen && <Searchbar onClose={() => setIsSearchOpen(false)} />}
       </AnimatePresence>

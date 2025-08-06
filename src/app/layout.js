@@ -1,6 +1,7 @@
 import "./globals.css";
 import Navbar from "@/components/main/navbar/navbar";
 import Provider from "@/components/provider";
+import Footer from "@/components/main/footer/footer";
 export const metadata = {
   icons:{
     icon: "/xaviquesm.png"
@@ -12,10 +13,12 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body >
+      <body className={"bg-[#0A0A0A]"}>
         <Provider>
         <Navbar />
         {children}
+     
+        <Footer />
         </Provider>
       </body>
     </html>
