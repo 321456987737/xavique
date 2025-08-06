@@ -4,8 +4,9 @@ import { motion } from "framer-motion";
 import { Plus, Minus, Image, Tag, Palette, Ruler, X, Upload } from "lucide-react";
 import React, { useState, useRef } from "react";
 import axios from "axios";
-
+import ImageUpload from "./ImageUpload";
 // Predefined options
+import {toast} from "react-hot-toast";
 const SIZE_OPTIONS = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"];
 const COLOR_OPTIONS = [
   "Black", "White", "Red", "Blue", "Green", "Yellow", 
@@ -294,14 +295,28 @@ const AddProductSection = () => {
 
         {/* Images */}
         <div className="space-y-6 lg:col-span-2">
-          <h3 className="text-lg font-semibold text-[#F6F5F3] border-b border-[#D4AF37] pb-2 flex items-center gap-2">
+         <div className="space-y-6 lg:col-span-2">
+  <h3 className="text-lg font-semibold text-[#F6F5F3] border-b border-[#D4AF37] pb-2 flex items-center gap-2">
+    <Image className="w-5 h-5" />
+    Product Images
+  </h3>
+  
+  <ImageUpload
+  images={productData.images || []} // Add fallback empty array
+  onChange={(newImages) => setProductData(prev => ({
+    ...prev,
+    images: newImages
+  }))}
+/>
+</div>
+          {/* <h3 className="text-lg font-semibold text-[#F6F5F3] border-b border-[#D4AF37] pb-2 flex items-center gap-2">
             <Image className="w-5 h-5" />
             Product Images
           </h3>
           
           <div className="space-y-4">
             {/* File Upload */}
-            <div className="border-2 border-dashed border-[#D4AF37]/50 rounded-lg p-6 text-center">
+            {/* <div className="border-2 border-dashed border-[#D4AF37]/50 rounded-lg p-6 text-center">
               <input
                 type="file"
                 ref={fileInputRef}
@@ -339,7 +354,7 @@ const AddProductSection = () => {
             </div>
             
             {/* Preview Uploaded Images */}
-            {productData.images.length > 0 && (
+            {/* {productData.images.length > 0 && (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4">
                 {productData.images.map((image, index) => (
                   <motion.div
@@ -375,8 +390,8 @@ const AddProductSection = () => {
                 ))}
               </div>
             )}
-          </div>
-        </div>
+          </div>*/}
+       </div>  
 
         {/* Variants */}
         <div className="space-y-6 lg:col-span-2">
