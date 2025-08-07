@@ -7,6 +7,7 @@ import axios from "axios";
 import ImageUpload from "./ImageUpload";
 // Predefined options
 import {toast} from "react-hot-toast";
+
 const SIZE_OPTIONS = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"];
 const COLOR_OPTIONS = [
   "Black", "White", "Red", "Blue", "Green", "Yellow", 
@@ -35,6 +36,27 @@ const AddProductSection = () => {
     isArchived: false
   });
 
+  // Reset form function
+  const resetForm = () => {
+    setProductData({
+      title: "",
+      description: "",
+      images: [],
+      price: 0,
+      discountPrice: 0,
+      inStock: true,
+      stockQuantity: 0,
+      category: "",
+      subcategory: "",
+      sizes: [],
+      colors: [],
+      tags: [],
+      slug: "",
+      isFeatured: false,
+      isArchived: false
+    });
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setProductData(prev => ({ ...prev, [name]: value }));
@@ -47,71 +69,59 @@ const AddProductSection = () => {
     }));
   };
 
-  const handleFileChange = async (e) => {
-    const files = Array.from(e.target.files);
-    if (files.length === 0) return;
-
-    setIsUploading(true);
-    setUploadProgress(0);
-
-    try {
-      const formData = new FormData();
-      files.forEach(file => {
-        formData.append('images', file);
-      });
-
-      const response = await axios.post('/api/upload', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        },
-        onUploadProgress: (progressEvent) => {
-          const percentCompleted = Math.round(
-            (progressEvent.loaded * 100) / progressEvent.total
-          );
-          setUploadProgress(percentCompleted);
-        }
-      });
-
-      const uploadedImages = response.data.urls.map(url => ({
-        url,
-        alt: `Product image ${productData.title}`
-      }));
-
-      setProductData(prev => ({
-        ...prev,
-        images: [...prev.images, ...uploadedImages]
-      }));
-    } catch (error) {
-      console.error("Upload failed:", error);
-      alert("Image upload failed. Please try again.");
-    } finally {
-      setIsUploading(false);
-      setUploadProgress(0);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-    }
-  };
-
-  const removeImage = (index) => {
-    setProductData(prev => ({
-      ...prev,
-      images: prev.images.filter((_, i) => i !== index)
-    }));
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     try {
       const response = await axios.post('/api/product', productData);
       console.log("Product added successfully:", response.data);
-      alert("Product added successfully!");
-      // Reset form or redirect as needed
+      
+      if (response.data.success) {
+        toast.success("Product added successfully!");
+        resetForm(); // Reset form on success
+      }
     } catch (error) {
       console.error("Error adding product:", error);
-      alert("Failed to add product. Please try again.");
+      toast.error("Failed to add product. Please try again.");
     }
+  };
+
+  // Handle size toggle
+  const toggleSize = (size) => {
+    setProductData(prev => ({
+      ...prev,
+      sizes: prev.sizes.includes(size) 
+        ? prev.sizes.filter(s => s !== size)
+        : [...prev.sizes, size]
+    }));
+  };
+
+  // Handle color toggle
+  const toggleColor = (color) => {
+    setProductData(prev => ({
+      ...prev,
+      colors: prev.colors.includes(color) 
+        ? prev.colors.filter(c => c !== color)
+        : [...prev.colors, color]
+    }));
+  };
+
+  // Handle tag addition
+  const addTag = (tag) => {
+    if (tag.trim() && !productData.tags.includes(tag.trim())) {
+      setProductData(prev => ({
+        ...prev,
+        tags: [...prev.tags, tag.trim()]
+      }));
+    }
+  };
+
+  // Handle tag removal
+  const removeTag = (index) => {
+    setProductData(prev => ({
+      ...prev,
+      tags: prev.tags.filter((_, i) => i !== index)
+    }));
   };
 
   return (
@@ -295,103 +305,19 @@ const AddProductSection = () => {
 
         {/* Images */}
         <div className="space-y-6 lg:col-span-2">
-         <div className="space-y-6 lg:col-span-2">
-  <h3 className="text-lg font-semibold text-[#F6F5F3] border-b border-[#D4AF37] pb-2 flex items-center gap-2">
-    <Image className="w-5 h-5" />
-    Product Images
-  </h3>
-  
-  <ImageUpload
-  images={productData.images || []} // Add fallback empty array
-  onChange={(newImages) => setProductData(prev => ({
-    ...prev,
-    images: newImages
-  }))}
-/>
-</div>
-          {/* <h3 className="text-lg font-semibold text-[#F6F5F3] border-b border-[#D4AF37] pb-2 flex items-center gap-2">
+          <h3 className="text-lg font-semibold text-[#F6F5F3] border-b border-[#D4AF37] pb-2 flex items-center gap-2">
             <Image className="w-5 h-5" />
             Product Images
           </h3>
           
-          <div className="space-y-4">
-            {/* File Upload */}
-            {/* <div className="border-2 border-dashed border-[#D4AF37]/50 rounded-lg p-6 text-center">
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileChange}
-                multiple
-                accept="image/*"
-                className="hidden"
-                disabled={isUploading}
-              />
-              <motion.button
-                type="button"
-                onClick={() => fileInputRef.current.click()}
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                className="mx-auto flex flex-col items-center justify-center gap-2"
-                disabled={isUploading}
-              >
-                <Upload className="w-8 h-8 text-[#D4AF37]" />
-                <span className="text-[#F6F5F3] font-medium">
-                  {isUploading ? 'Uploading...' : 'Click to upload images'}
-                </span>
-                <span className="text-sm text-[#F6F5F3]/70">
-                  PNG, JPG, WEBP up to 10MB
-                </span>
-              </motion.button>
-              
-              {isUploading && (
-                <div className="w-full bg-[#2E2E2E] rounded-full h-2.5 mt-4">
-                  <div 
-                    className="bg-[#D4AF37] h-2.5 rounded-full" 
-                    style={{ width: `${uploadProgress}%` }}
-                  ></div>
-                </div>
-              )}
-            </div>
-            
-            {/* Preview Uploaded Images */}
-            {/* {productData.images.length > 0 && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4">
-                {productData.images.map((image, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="relative group"
-                  >
-                    <img
-                      src={image.url}
-                      alt={image.alt}
-                      className="w-full h-32 object-cover rounded-lg"
-                    />
-                    <motion.button
-                      type="button"
-                      onClick={() => removeImage(index)}
-                      whileHover={{ scale: 1.1 }}
-                      className="absolute -top-2 -right-2 bg-[#5A1A17] text-[#F6F5F3] p-1 rounded-full"
-                    >
-                      <X className="w-4 h-4" />
-                    </motion.button>
-                    <input
-                      value={image.alt}
-                      onChange={(e) => {
-                        const newImages = [...productData.images];
-                        newImages[index].alt = e.target.value;
-                        setProductData(prev => ({ ...prev, images: newImages }));
-                      }}
-                      className="w-full mt-1 bg-[#2E2E2E] border border-[#D4AF37]/50 rounded px-2 py-1 text-xs text-[#F6F5F3] focus:outline-none focus:ring-1 focus:ring-[#D4AF37]"
-                      placeholder="Image description"
-                    />
-                  </motion.div>
-                ))}
-              </div>
-            )}
-          </div>*/}
-       </div>  
+          <ImageUpload
+            images={productData.images || []}
+            onChange={(newImages) => setProductData(prev => ({
+              ...prev,
+              images: newImages
+            }))}
+          />
+        </div>  
 
         {/* Variants */}
         <div className="space-y-6 lg:col-span-2">
@@ -407,25 +333,30 @@ const AddProductSection = () => {
                 Available Sizes
               </h4>
               
-              <select
-                multiple
-                value={productData.sizes}
-                onChange={(e) => handleArrayChange("sizes", Array.from(e.target.selectedOptions, option => option.value))}
-                className="w-full bg-[#2E2E2E] border border-[#D4AF37]/50 rounded-lg px-4 py-2 text-[#F6F5F3] focus:outline-none focus:ring-1 focus:ring-[#D4AF37] h-auto min-h-[42px]"
-              >
+              <div className="flex flex-wrap gap-2">
                 {SIZE_OPTIONS.map(size => (
-                  <option 
-                    key={size} 
-                    value={size}
-                    className="checked:bg-[#D4AF37] checked:text-[#0A0A0A]"
+                  <motion.button
+                    key={size}
+                    type="button"
+                    onClick={() => toggleSize(size)}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className={`px-4 py-2 rounded-lg border transition-colors ${
+                      productData.sizes.includes(size)
+                        ? 'bg-[#D4AF37] text-[#0A0A0A] border-[#D4AF37]'
+                        : 'bg-[#2E2E2E] text-[#F6F5F3] border-[#D4AF37]/50 hover:border-[#D4AF37]'
+                    }`}
                   >
                     {size}
-                  </option>
+                  </motion.button>
                 ))}
-              </select>
-              <p className="text-xs text-[#F6F5F3]/70">
-                Hold Ctrl/Cmd to select multiple sizes
-              </p>
+              </div>
+              
+              {productData.sizes.length > 0 && (
+                <div className="text-xs text-[#F6F5F3]/70">
+                  Selected: {productData.sizes.join(', ')}
+                </div>
+              )}
             </div>
             
             {/* Colors */}
@@ -435,25 +366,30 @@ const AddProductSection = () => {
                 Available Colors
               </h4>
               
-              <select
-                multiple
-                value={productData.colors}
-                onChange={(e) => handleArrayChange("colors", Array.from(e.target.selectedOptions, option => option.value))}
-                className="w-full bg-[#2E2E2E] border border-[#D4AF37]/50 rounded-lg px-4 py-2 text-[#F6F5F3] focus:outline-none focus:ring-1 focus:ring-[#D4AF37] h-auto min-h-[42px]"
-              >
+              <div className="flex flex-wrap gap-2">
                 {COLOR_OPTIONS.map(color => (
-                  <option 
-                    key={color} 
-                    value={color}
-                    className="checked:bg-[#D4AF37] checked:text-[#0A0A0A]"
+                  <motion.button
+                    key={color}
+                    type="button"
+                    onClick={() => toggleColor(color)}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className={`px-3 py-2 rounded-lg border text-sm transition-colors ${
+                      productData.colors.includes(color)
+                        ? 'bg-[#D4AF37] text-[#0A0A0A] border-[#D4AF37]'
+                        : 'bg-[#2E2E2E] text-[#F6F5F3] border-[#D4AF37]/50 hover:border-[#D4AF37]'
+                    }`}
                   >
                     {color}
-                  </option>
+                  </motion.button>
                 ))}
-              </select>
-              <p className="text-xs text-[#F6F5F3]/70">
-                Hold Ctrl/Cmd to select multiple colors
-              </p>
+              </div>
+              
+              {productData.colors.length > 0 && (
+                <div className="text-xs text-[#F6F5F3]/70">
+                  Selected: {productData.colors.join(', ')}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -469,13 +405,11 @@ const AddProductSection = () => {
             <div className="flex items-center gap-2">
               <input
                 type="text"
+                id="tagInput"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && e.target.value.trim()) {
                     e.preventDefault();
-                    setProductData(prev => ({
-                      ...prev,
-                      tags: [...prev.tags, e.target.value.trim()]
-                    }));
+                    addTag(e.target.value);
                     e.target.value = '';
                   }
                 }}
@@ -485,18 +419,15 @@ const AddProductSection = () => {
               <motion.button
                 type="button"
                 onClick={() => {
-                  const input = document.querySelector('input[type="text"][placeholder="Type a tag and press Enter"]');
+                  const input = document.getElementById('tagInput');
                   if (input && input.value.trim()) {
-                    setProductData(prev => ({
-                      ...prev,
-                      tags: [...prev.tags, input.value.trim()]
-                    }));
+                    addTag(input.value);
                     input.value = '';
                   }
                 }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="px-3 py-2 bg-[#D4AF37] text-[#0A0A0A] rounded-lg flex items-center gap-1"
+                className="px-4 py-2 bg-[#D4AF37] text-[#0A0A0A] rounded-lg flex items-center gap-1 font-medium"
               >
                 <Plus className="w-4 h-4" />
                 Add
@@ -507,24 +438,22 @@ const AddProductSection = () => {
               <div className="flex flex-wrap gap-2">
                 {productData.tags.map((tag, index) => (
                   <motion.div
-                    key={index}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="flex items-center gap-1 bg-[#2E2E2E] border border-[#D4AF37]/50 rounded-full px-3 py-1"
+                    key={`${tag}-${index}`}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    className="flex items-center gap-2 bg-[#2E2E2E] border border-[#D4AF37]/50 rounded-full px-3 py-1"
                   >
                     <span className="text-sm text-[#F6F5F3]">{tag}</span>
-                    <button
+                    <motion.button
                       type="button"
-                      onClick={() => {
-                        setProductData(prev => ({
-                          ...prev,
-                          tags: prev.tags.filter((_, i) => i !== index)
-                        }));
-                      }}
-                      className="text-[#F6F5F3] hover:text-[#D4AF37]"
+                      onClick={() => removeTag(index)}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      className="text-[#F6F5F3] hover:text-[#D4AF37] transition-colors"
                     >
                       <X className="w-3 h-3" />
-                    </button>
+                    </motion.button>
                   </motion.div>
                 ))}
               </div>
@@ -583,20 +512,8 @@ const AddProductSection = () => {
             className="w-full bg-[#D4AF37] text-[#0A0A0A] font-bold py-3 px-6 rounded-lg shadow-lg hover:bg-[#C9A227] transition-colors flex items-center justify-center gap-2"
             disabled={isUploading}
           >
-            {isUploading ? (
-              <span className="flex items-center gap-2">
-                <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-[#0A0A0A]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Processing...
-              </span>
-            ) : (
-              <>
-                <Plus className="w-5 h-5" />
-                Add Product
-              </>
-            )}
+            <Plus className="w-5 h-5" />
+            Add Product
           </motion.button>
         </motion.div>
       </form>

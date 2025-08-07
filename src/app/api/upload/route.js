@@ -1,68 +1,63 @@
-import imageKitConfig from "@/lib/imagekit";
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
+import ImageKit from 'imagekit';
 
-// Handle image uploads
+const imagekit = new ImageKit({
+  publicKey: process.env.NEXT_PUBLIC_PUBLIC_KEY,
+  privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
+  urlEndpoint: process.env.NEXT_PUBLIC_URL_ENDPOINT
+});
+
 export async function POST(request) {
-    try {
-        const formData = await request.formData();
-        const files = formData.getAll('images');
+  try {
+    const formData = await request.formData();
+    const files = formData.getAll('images');
+    
+    if (!files || files.length === 0) {
+      return NextResponse.json(
+        { error: 'No images provided' },
+        { status: 400 }
+      );
+    }
+
+    const uploadPromises = files.map(async (file) => {
+      try {
+        // Get the file as a buffer
+        const fileBuffer = await file.arrayBuffer();
         
-        const uploadedFiles = await Promise.all(
-            files.map(async (file) => {
-                const bytes = await file.arrayBuffer();
-                const buffer = Buffer.from(bytes);
-                
-                const result = await imageKitConfig.upload({
-                    file: buffer,
-                    fileName: `product-${Date.now()}-${file.name}`,
-                    folder: "/products"
-                });
-
-                return {
-                    url: result.url,
-                    fileId: result.fileId,
-                    thumbnailUrl: result.thumbnailUrl
-                };
-            })
-        );
-
-        return NextResponse.json({ 
-            success: true, 
-            files: uploadedFiles 
+        // Upload to ImageKit
+        const result = await imagekit.upload({
+          file: Buffer.from(fileBuffer),
+          fileName: file.name,
+          folder: '/ecommerce-products',
+          useUniqueFileName: true
         });
 
-    } catch (error) {
-        console.error('Upload failed:', error);
-        return NextResponse.json({ 
-            success: false, 
-            error: error.message 
-        }, { status: 500 });
-    }
-}
+        return {
+          url: result.url,
+          fileId: result.fileId,
+          thumbnailUrl: `${result.url}?tr=w-300,h-300`
+        };
+      } catch (error) {
+        console.error('Error uploading single file:', error);
+        throw error;
+      }
+    });
 
-// Handle image deletions
-export async function DELETE(request) {
-    try {
-        const { searchParams } = new URL(request.url);
-        const fileId = searchParams.get('fileId');
+    const results = await Promise.all(uploadPromises);
+    return NextResponse.json({ 
+      success: true,
+      images: results 
+    });
 
-        if (!fileId) {
-            return NextResponse.json({ 
-                success: false, 
-                error: 'File ID required' 
-            }, { status: 400 });
-        }
-
-        await imageKitConfig.deleteFile(fileId);
-        return NextResponse.json({ 
-            success: true 
-        });
-
-    } catch (error) {
-        console.error('Delete failed:', error);
-        return NextResponse.json({ 
-            success: false, 
-            error: error.message 
-        }, { status: 500 });
-    }
+  } catch (error) {
+    console.error('Upload route error:', error);
+    return NextResponse.json(
+      { 
+        success: false,
+        error: 'Failed to upload images',
+        details: error.message 
+      },
+      { status: 500 }
+    );
+  }
 }
