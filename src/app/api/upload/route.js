@@ -42,8 +42,10 @@ export async function POST(request) {
         throw error;
       }
     });
-
+    console.log(uploadPromises,"this si the upload promise")
+      
     const results = await Promise.all(uploadPromises);
+    console.log(results,"this si the results")
     return NextResponse.json({ 
       success: true,
       images: results 

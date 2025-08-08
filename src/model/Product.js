@@ -15,6 +15,7 @@ const productSchema = new mongoose.Schema(
 
     images: [
       {
+        fileId: { type: String, required: true },
         url: { type: String, required: true },
         alt: { type: String },
       },

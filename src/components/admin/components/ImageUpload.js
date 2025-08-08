@@ -1,82 +1,33 @@
+// components/ImageUpload.jsx
 import { useState, useRef } from 'react';
-import { motion,AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, X } from 'lucide-react';
-import axios from 'axios';
-import { toast } from 'react-hot-toast';
 
 export default function ImageUpload({ images = [], onChange }) {
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef(null);
 
-  const handleFileUpload = async (event) => {
-    const files = Array.from(event.target.files);
-    if (files.length === 0) return;
+  const handleFileSelect = (e) => {
+    const newFiles = Array.from(e.target.files);
+    if (newFiles.length === 0) return;
 
-    setIsUploading(true);
-    const formData = new FormData();
-    files.forEach(file => formData.append('images', file));
-
-    try {
-      const response = await axios.post('/api/upload', formData, {
-        onUploadProgress: (event) => {
-          const progress = Math.round((event.loaded * 100) / event.total);
-          setUploadProgress(progress);
-        }
-      });
-
-      if (response.data.success) {
-        const newImages = response.data.images.map(image => ({
-          url: image.url,
-          fileId: image.fileId,
-          alt: ''
-        }));
-
-        const currentImages = Array.isArray(images) ? images : [];
-        onChange([...currentImages, ...newImages]);
-        toast.success('Images uploaded successfully!');
-      }
-    } catch (error) {
-      toast.error('Upload failed. Please try again.');
-      console.error('Upload error:', error);
-    } finally {
-      setIsUploading(false);
-      setUploadProgress(0);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    }
-  };
-
-  const handleImageDelete = async (index) => {
-    const image = images[index];
+    // Store files locally
+    onChange([...images, ...newFiles]);
     
-    // Check if we have a valid fileId
-    if (!image?.fileId) {
-      console.error('No valid fileId found for image:', image);
-      return;
-    }
-
-    try {
-      await axios.post('/api/delete-images', { 
-        fileIds: [image.fileId] 
-      });
-      
-      const updatedImages = images.filter((_, i) => i !== index);
-      onChange(updatedImages);
-      toast.success('Image removed successfully');
-    } catch (error) {
-      toast.error('Failed to remove image');
-      console.error('Delete error:', error);
+    // Reset input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
-  const handleAltTextChange = (index, altText) => {
+
+  const handleLocalImageDelete = (index) => {
     const updatedImages = [...images];
-    updatedImages[index] = {
-      ...updatedImages[index],
-      alt: altText
-    };
+    updatedImages.splice(index, 1);
     onChange(updatedImages);
+  };
+
+  const handleAltTextChange = (index, altText) => {
+    // Not implemented since we're only storing files
+    // Would require storing alt text separately if needed
   };
 
   return (
@@ -85,98 +36,66 @@ export default function ImageUpload({ images = [], onChange }) {
         <input
           type="file"
           ref={fileInputRef}
-          onChange={handleFileUpload}
+          onChange={handleFileSelect}
           multiple
           accept="image/*"
           className="hidden"
-          disabled={isUploading}
         />
         
         <motion.button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          whileHover={{ scale: isUploading ? 1 : 1.01 }}
-          whileTap={{ scale: isUploading ? 1 : 0.99 }}
-          className={`w-full p-8 flex flex-col items-center gap-3 transition-opacity ${
-            isUploading ? 'opacity-50 cursor-not-allowed' : ''
-          }`}
-          disabled={isUploading}
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.99 }}
+          className="w-full p-8 flex flex-col items-center gap-3"
         >
           <div className="w-16 h-16 rounded-full bg-[#D4AF37]/10 flex items-center justify-center">
-            <Upload className={`w-8 h-8 text-[#D4AF37] ${isUploading ? 'animate-pulse' : ''}`} />
+            <Upload className="w-8 h-8 text-[#D4AF37]" />
           </div>
           
           <div className="text-center">
             <p className="text-lg font-medium text-[#D4AF37]">
-              {isUploading ? 'Uploading...' : 'Click to upload images'}
+              Click to upload images
             </p>
             <p className="text-sm text-[#F6F5F3]/70 mt-1">
               PNG, JPG, WEBP up to 10MB
             </p>
           </div>
-
-          {isUploading && (
-            <div className="w-full max-w-xs">
-              <div className="bg-[#2E2E2E] h-2 rounded-full mt-4">
-                <motion.div 
-                  className="bg-[#D4AF37] h-2 rounded-full"
-                  initial={{ width: 0 }}
-                  animate={{ width: `${uploadProgress}%` }}
-                  transition={{ duration: 0.3 }}
-                />
-              </div>
-              <p className="text-sm text-center text-[#F6F5F3]/70 mt-2">
-                {uploadProgress}%
-              </p>
-            </div>
-          )}
         </motion.button>
       </div>
 
       <AnimatePresence mode="popLayout">
-        {images?.length > 0 && (
+        {images.length > 0 && (
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"
           >
-            {images.map((image, index) => (
+            {images.map((file, index) => (
               <motion.div
-                key={`${image.fileId || image.url}-${index}`}
+                key={`${file.name}-${index}`}
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
                 className="relative group aspect-square"
               >
                 <img
-                  src={image.url}
-                  alt={image.alt || `Product image ${index + 1}`}
+                  src={URL.createObjectURL(file)}
+                  alt={`Preview ${index + 1}`}
                   className="w-full h-full object-cover rounded-lg"
-                  onError={(e) => {
-                    console.error('Image failed to load:', image.url);
-                    e.target.style.display = 'none';
-                  }}
                 />
                 
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg" />
                 
                 <motion.button
                   type="button"
-                  onClick={() => handleImageDelete(index)}
+                  onClick={() => handleLocalImageDelete(index)}
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   className="absolute top-2 right-2 p-1.5 bg-red-500 hover:bg-red-600 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 z-10"
                 >
                   <X className="w-4 h-4 text-white" />
                 </motion.button>
-
-                <input
-                  type="text"
-                  value={image.alt || ''}
-                  onChange={(e) => handleAltTextChange(index, e.target.value)}
-                  placeholder="Image description"
-                  className="absolute bottom-2 left-2 right-2 px-2 py-1 bg-black/60 backdrop-blur-sm rounded text-white text-sm opacity-0 group-hover:opacity-100 transition-opacity focus:opacity-100 outline-none border-0 focus:ring-1 focus:ring-[#D4AF37]"
-                />
                 
                 {/* Image index indicator */}
                 <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-sm rounded-full w-6 h-6 flex items-center justify-center">
@@ -189,17 +108,17 @@ export default function ImageUpload({ images = [], onChange }) {
       </AnimatePresence>
 
       {/* Images summary */}
-      {images?.length > 0 && (
+      {images.length > 0 && (
         <div className="text-sm text-[#F6F5F3]/70 text-center">
-          {images.length} image{images.length !== 1 ? 's' : ''} uploaded
+          {images.length} image{images.length !== 1 ? 's' : ''} selected
         </div>
       )}
     </div>
   );
 }
 // import { useState, useRef } from 'react';
-// import { motion, AnimatePresence } from 'framer-motion';
-// import { Upload, X, Image as ImageIcon } from 'lucide-react';
+// import { motion,AnimatePresence } from 'framer-motion';
+// import { Upload, X } from 'lucide-react';
 // import axios from 'axios';
 // import { toast } from 'react-hot-toast';
 
@@ -207,7 +126,6 @@ export default function ImageUpload({ images = [], onChange }) {
 //   const [isUploading, setIsUploading] = useState(false);
 //   const [uploadProgress, setUploadProgress] = useState(0);
 //   const fileInputRef = useRef(null);
-
 
 //   const handleFileUpload = async (event) => {
 //     const files = Array.from(event.target.files);
@@ -224,22 +142,24 @@ export default function ImageUpload({ images = [], onChange }) {
 //           setUploadProgress(progress);
 //         }
 //       });
-
+//       // console.log(response.data,"this is the response data");
+//       // console.log(response,"this is response")
 //       if (response.data.success) {
-//         const newImages = response.data.files.map(file => ({
-//           url: file.url,
-//           fileId: file.fileId,
+//         // console.log(response.data,"this is the response dat");
+//         const newImages = response.data.images.map(image => ({
+//           url: image.url,
+//           fileId: image.fileId,
 //           alt: ''
 //         }));
-
-//         // Fix: Ensure images is an array before spreading
+//         console.log(newImages,"this is the new images");
 //         const currentImages = Array.isArray(images) ? images : [];
+//         console.log(currentImages,"this is the current images");
 //         onChange([...currentImages, ...newImages]);
 //         toast.success('Images uploaded successfully!');
 //       }
 //     } catch (error) {
 //       toast.error('Upload failed. Please try again.');
-//       console.error(error);
+//       console.error('Upload error:', error);
 //     } finally {
 //       setIsUploading(false);
 //       setUploadProgress(0);
@@ -252,15 +172,32 @@ export default function ImageUpload({ images = [], onChange }) {
 //   const handleImageDelete = async (index) => {
 //     const image = images[index];
     
+//     // Check if we have a valid fileId
+//     if (!image?.fileId) {
+//       console.error('No valid fileId found for image:', image);
+//       return;
+//     }
+
 //     try {
-//       await axios.delete(`/api/upload?fileId=${image.fileId}`);
+//       await axios.post('/api/delete-images', { 
+//         fileId: [image.fileId] 
+//       });
+      
 //       const updatedImages = images.filter((_, i) => i !== index);
 //       onChange(updatedImages);
-//       toast.success('Image removed');
+//       toast.success('Image removed successfully');
 //     } catch (error) {
 //       toast.error('Failed to remove image');
-//       console.error(error);
+//       console.error('Delete error:', error);
 //     }
+//   };
+//   const handleAltTextChange = (index, altText) => {
+//     const updatedImages = [...images];
+//     updatedImages[index] = {
+//       ...updatedImages[index],
+//       alt: altText
+//     };
+//     onChange(updatedImages);
 //   };
 
 //   return (
@@ -273,18 +210,21 @@ export default function ImageUpload({ images = [], onChange }) {
 //           multiple
 //           accept="image/*"
 //           className="hidden"
+//           disabled={isUploading}
 //         />
         
 //         <motion.button
 //           type="button"
 //           onClick={() => fileInputRef.current?.click()}
-//           whileHover={{ scale: 1.01 }}
-//           whileTap={{ scale: 0.99 }}
-//           className="w-full p-8 flex flex-col items-center gap-3"
+//           whileHover={{ scale: isUploading ? 1 : 1.01 }}
+//           whileTap={{ scale: isUploading ? 1 : 0.99 }}
+//           className={`w-full p-8 flex flex-col items-center gap-3 transition-opacity ${
+//             isUploading ? 'opacity-50 cursor-not-allowed' : ''
+//           }`}
 //           disabled={isUploading}
 //         >
 //           <div className="w-16 h-16 rounded-full bg-[#D4AF37]/10 flex items-center justify-center">
-//             <Upload className="w-8 h-8 text-[#D4AF37]" />
+//             <Upload className={`w-8 h-8 text-[#D4AF37] ${isUploading ? 'animate-pulse' : ''}`} />
 //           </div>
           
 //           <div className="text-center">
@@ -323,7 +263,7 @@ export default function ImageUpload({ images = [], onChange }) {
 //           >
 //             {images.map((image, index) => (
 //               <motion.div
-//                 key={image.fileId}
+//                 key={`${image.fileId || image.url}-${index}`}
 //                 initial={{ opacity: 0, scale: 0.8 }}
 //                 animate={{ opacity: 1, scale: 1 }}
 //                 exit={{ opacity: 0, scale: 0.8 }}
@@ -331,40 +271,50 @@ export default function ImageUpload({ images = [], onChange }) {
 //               >
 //                 <img
 //                   src={image.url}
-//                   alt={image.alt}
+//                   alt={image.alt || `Product image ${index + 1}`}
 //                   className="w-full h-full object-cover rounded-lg"
+//                   onError={(e) => {
+//                     console.error('Image failed to load:', image.url);
+//                     e.target.style.display = 'none';
+//                   }}
 //                 />
                 
 //                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg" />
                 
 //                 <motion.button
+//                   type="button"
 //                   onClick={() => handleImageDelete(index)}
 //                   whileHover={{ scale: 1.1 }}
 //                   whileTap={{ scale: 0.9 }}
-//                   className="absolute top-2 right-2 p-1.5 bg-red-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+//                   className="absolute top-2 right-2 p-1.5 bg-red-500 hover:bg-red-600 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 z-10"
 //                 >
 //                   <X className="w-4 h-4 text-white" />
 //                 </motion.button>
 
 //                 <input
 //                   type="text"
-//                   value={image.alt}
-//                   onChange={(e) => {
-//                     const updatedImages = [...images];
-//                     updatedImages[index] = {
-//                       ...image,
-//                       alt: e.target.value
-//                     };
-//                     onChange(updatedImages);
-//                   }}
+//                   value={image.alt || ''}
+//                   onChange={(e) => handleAltTextChange(index, e.target.value)}
 //                   placeholder="Image description"
-//                   className="absolute bottom-2 left-2 right-2 px-2 py-1 bg-black/60 rounded text-white text-sm opacity-0 group-hover:opacity-100 transition-opacity focus:opacity-100 outline-none"
+//                   className="absolute bottom-2 left-2 right-2 px-2 py-1 bg-black/60 backdrop-blur-sm rounded text-white text-sm opacity-0 group-hover:opacity-100 transition-opacity focus:opacity-100 outline-none border-0 focus:ring-1 focus:ring-[#D4AF37]"
 //                 />
+                
+//                 {/* Image index indicator */}
+//                 <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-sm rounded-full w-6 h-6 flex items-center justify-center">
+//                   <span className="text-white text-xs font-medium">{index + 1}</span>
+//                 </div>
 //               </motion.div>
 //             ))}
 //           </motion.div>
 //         )}
 //       </AnimatePresence>
+
+//       {/* Images summary */}
+//       {images?.length > 0 && (
+//         <div className="text-sm text-[#F6F5F3]/70 text-center">
+//           {images.length} image{images.length !== 1 ? 's' : ''} uploaded
+//         </div>
+//       )}
 //     </div>
 //   );
 // }

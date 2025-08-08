@@ -36,9 +36,14 @@ export async function GET(request) {
       .lean() // Return plain JavaScript objects
       .limit(10); // Limit to 10 results
 
-    if (!products.length) {
+    if (products == []) {
       return NextResponse.json(
-        { error: "No products found" },
+        { error: "No products found." },
+        { status: 200 }
+      );
+    }else if (!products) {
+      return NextResponse.json(
+        { error: "No products found." },
         { status: 404 }
       );
     }

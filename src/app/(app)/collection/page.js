@@ -2,7 +2,9 @@ import React from 'react'
 
 const Page = () => {
   return (
-    <div>collection Page</div>
+    <div className='bg-[#0A0A0A] text-white'>
+      collection
+    </div>
   )
 }
 

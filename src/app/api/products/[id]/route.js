@@ -4,8 +4,10 @@ import Product from '@/model/Product';
 import imagekit from '@/lib/imagekit';
 export async function PUT(request, { params }) {
   try {
+    console.log('hello 1')
     await dbConnect();
     const { id } = await params;
+    console.log('hello 2',id)
     const data = await request.json();
 
     const updatedProduct = await Product.findByIdAndUpdate(
@@ -34,8 +36,8 @@ export async function PUT(request, { params }) {
 export async function DELETE(req, { params }) {
   try {
     await dbConnect();
-    const productId = await params.id;
-
+    const {id} = await params;
+    const productId = id
     const product = await Product.findById(productId);
     if (!product) {
       return NextResponse.json({ error: 'Product not found', success: false }, { status: 404 });
@@ -44,8 +46,8 @@ export async function DELETE(req, { params }) {
     // Delete images from ImageKit
     if (product.images?.length) {
       for (const img of product.images) {
-        if (img.fileId) {
-          await imagekit.deleteFile(img.fileId);
+        if (img.id) {
+          await imagekit.deleteFile(img.id);
         }
       }
     }

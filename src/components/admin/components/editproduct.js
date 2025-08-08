@@ -5,6 +5,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
+
 // Predefined options
 const SIZE_OPTIONS = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"];
 const COLOR_OPTIONS = [
@@ -36,6 +37,7 @@ const EditProduct = () => {
   const [showColors, setShowColors] = useState(false);
   const [activeTab, setActiveTab] = useState("basic");
   const [showSearchResults, setShowSearchResults] = useState(false);
+  const [searchError, setSearchError] = useState(null);
   const fileInputRef = useRef(null);
   const searchTimeoutRef = useRef(null);
 
@@ -43,15 +45,21 @@ const EditProduct = () => {
   const debouncedSearch = useCallback(async (term) => {
     if (!term.trim()) {
       setSearchResults([]);
+      setSearchError(null);
       return;
     }
 
     setIsSearching(true);
+    setSearchError(null);
     try {
       const response = await axios.get(`/api/products?search=${term}`);
+      if (response.data.length === 0 && response.data.error === "No products found.") {
+        setSearchError("No products found. Try a different search term.");
+      }
       setSearchResults(response.data);
       setShowSearchResults(true);
     } catch (error) {
+      setSearchError("Error searching for products. Please try again.");
       toast.error("Error searching for products");
       console.error(error);
     } finally {
@@ -90,182 +98,109 @@ const EditProduct = () => {
     setSearchResults([]);
     setShowSearchResults(false);
     setActiveTab("basic");
+    setSearchError(null);
   };
 
   // Handle image upload
-const handleImageUpload = async (e) => {
-  const files = Array.from(e.target.files);
-  if (!files.length || !product) return;
+  const handleImageUpload = async (e) => {
+    const files = Array.from(e.target.files);
+    if (!files.length || !product) return;
 
-  setIsUploading(true);
-  try {
-    const formData = new FormData();
-    files.forEach(file => formData.append('images', file));
-    console.log(1)
-    const uploadResponse = await axios.post('/api/upload', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
-    console.log(2)
-    if (uploadResponse.data.success) {
-      const newImages = uploadResponse.data.images.map(img => ({
-        url: img.url,
-        _id: img._id,  // Make sure to use fileId
-        thumbnailUrl: img.thumbnailUrl,
-        alt: `Product image ${product.title}`
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      files.forEach(file => formData.append('images', file));
+      
+      const uploadResponse = await axios.post('/api/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+
+      if (uploadResponse.data.success) {
+        const newImages = uploadResponse.data.images.map(img => ({
+          url: img.url,
+          _id: img._id,
+          thumbnailUrl: img.thumbnailUrl,
+          alt: `Product image ${product.title}`
+        }));
+
+        setProduct(prev => ({ 
+          ...prev, 
+          images: [...prev.images, ...newImages] 
+        }));
+
+        // Immediately update the product in database
+        await axios.put(`/api/products/${product._id}`, {
+          images: [...product.images, ...newImages]
+        });
+        
+        toast.success("Images added successfully");
+      } else {
+        throw new Error(uploadResponse.data.error || 'Upload failed');
+      }
+    } catch (error) {
+      toast.error(error.message || "Failed to upload images");
+      console.error('Upload error:', error);
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  // Remove single image
+  const removeImage = async (id) => {
+    if (!product || !id) return;
+    try {
+      console.log(id,"holalala la");
+      await axios.post('/api/delete-images', { 
+        fileId: [id]
+      });
+
+      // Then update local state and database
+      const updatedImages = product.images.filter(img => img.fileId !== id);
+
+      setProduct(prev => ({
+        ...prev,
+        images: updatedImages
       }));
-      console.log(3);
-      setProduct(prev => ({ 
-        ...prev, 
-        images: [...prev.images, ...newImages] 
-      }));
-        console.log(4)
-      // Immediately update the product in database
+      console.log(updatedImages,"this is the updated images");
+      // Update database
       await axios.put(`/api/products/${product._id}`, {
-        images: [...product.images, ...newImages]
+        images: updatedImages
       });
       
-      toast.success("Images added successfully");
-    } else {
-      throw new Error(uploadResponse.data.error || 'Upload failed');
+      toast.success("Image removed successfully");
+    } catch (error) {
+      console.error('Failed to remove image:', error);
+      toast.error("Failed to remove image");
     }
-  } catch (error) {
-    toast.error(error.message || "Failed to upload images");
-    console.error('Upload error:', error);
-  } finally {
-    setIsUploading(false);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  }
-};
+  };
 
-// Remove single image
-const removeImage = async (id) => {
-  if (!product || !id) return;
-  
-  try {
-    // First delete from ImageKit
-    await axios.post('/api/delete-images', { 
-      _id: [id]  // Make sure to send fileIds array
-    });
+  // Remove all images
+  const removeAllImages = async () => {
+    if (!product?.images?.length) return;
 
-    // Then update local state and database
-    const updatedImages = product.images.filter(img => img._id !== id);
-
-    setProduct(prev => ({
-      ...prev,
-      images: updatedImages
-    }));
-    
-    // Update database
-    await axios.put(`/api/products/${product._id}`, {
-      images: updatedImages
-    });
-    
-    toast.success("Image removed successfully");
-  } catch (error) {
-    console.error('Failed to remove image:', error);
-    toast.error("Failed to remove image");
-  }
-};
-
-// Remove all images
-const removeAllImages = async () => {
-  if (!product?.images?.length) return;
-
-  try {
-    const _id = product.images.map(img => img._id);
-    
-    // First delete from ImageKit
-    await axios.post('/api/delete-images', { 
-      _id: _id  // Make sure to send fileIds array
-    });
-    
-    // Then update local state and database
-    setProduct(prev => ({ ...prev, images: [] }));
-    
-    // Update database
-    await axios.put(`/api/products/${product._id}`, {
-      images: []
-    });
-    
-    toast.success("All images removed");
-  } catch (error) {
-    console.error('Failed to remove images:', error);
-    toast.error("Failed to remove images");
-  }
-};
-  // Handle image upload
-//   const handleImageUpload = async (e) => {
-//     const files = Array.from(e.target.files);
-//     if (!files.length || !product) return;
-
-//     setIsUploading(true);
-//     try {
-//       const formData = new FormData();
-//       files.forEach(file => formData.append('images', file));
-
-//       const uploadResponse = await axios.post('/api/upload', formData, {
-//         headers: { 'Content-Type': 'multipart/form-data' }
-//       });
-
-//       const newImages = uploadResponse.data.images.map(img => ({
-//         url: img.url,
-//         fileId: img.fileId,
-//         alt: `Product image ${product.title}`
-//       }));
-
-//       setProduct(prev => ({ 
-//         ...prev, 
-//         images: [...prev.images, ...newImages] 
-//       }));
-//       toast.success("Images added successfully");
-//     } catch (error) {
-//       toast.error("Failed to upload images");
-//       console.error(error);
-//     } finally {
-//       setIsUploading(false);
-//       if (fileInputRef.current) fileInputRef.current.value = "";
-//     }
-//   };
-
-//   // Remove single image
-//   // Update the removeImage function
-// const removeImage = async (imageId) => {
-//   if (!product || !imageId) return;
-  
-//   try {
-//     await axios.post('/api/delete-images', { 
-//       _id: [imageId] 
-//     });
-
-//     setProduct(prev => ({
-//       ...prev,
-//       images: prev.images.filter(img => img._id !== imageId)
-//     }));
-    
-//     toast.success("Image removed successfully");
-//   } catch (error) {
-//     console.error('Failed to remove image:', error);
-//     toast.error("Failed to remove image");
-//   }
-// };
-
-// // Update the removeAllImages function
-// const removeAllImages = async () => {
-//   if (!product?.images?.length) return;
-
-//   try {
-//     const imageIds = product.images.map(img => img._id);
-//     await axios.post('/api/delete-images', { 
-//       _id: imageIds 
-//     });
-    
-//     setProduct(prev => ({ ...prev, images: [] }));
-//     toast.success("All images removed");
-//   } catch (error) {
-//     console.error('Failed to remove images:', error);
-//     toast.error("Failed to remove images");
-//   }
-// };
+    try {
+      const _id = product.images.map(img => img.fileId);
+      
+      // First delete from ImageKit
+      await axios.post('/api/delete-images', { 
+        fileId: _id
+      });
+      
+      // Then update local state and database
+      setProduct(prev => ({ ...prev, images: [] }));
+      
+      // Update database
+      await axios.put(`/api/products/${product._id}`, {
+        images: []
+      });
+      
+      toast.success("All images removed");
+    } catch (error) {
+      console.error('Failed to remove images:', error);
+      toast.error("Failed to remove images");
+    }
+  };
 
   // Save changes
   const handleSave = async (e) => {
@@ -346,27 +281,35 @@ const removeAllImages = async () => {
   };
 
   const handleDelete = async (productId) => {
-  const confirm = window.confirm("Are you sure you want to delete this product?");
-  if (!confirm) return;
+    const confirm = window.confirm("Are you sure you want to delete this product? This action cannot be undone.");
+    if (!confirm) return;
 
-  try {
-    const res = await fetch(`/api/products/${productId}`, {
-      method: "DELETE",
-    });
-    console.log(res)
-    if (res.data.ok || res.ok || res.status === 200 || res.status >=200 <= 299) {
-      setProduct(!product);
+    setIsLoading(true);
+    try {
+      const res = await axios.delete(`/api/products/${productId}`);
+      
+      if (res.status >= 200 && res.status < 300) {
+        toast.success("Product deleted successfully");
+        setProduct(null);
+        setSearchTerm("");
+        setSearchResults([]);
+        setSearchError(null);
+      } else {
+        throw new Error(res.data?.message || "Failed to delete product");
+      }
+    } catch (err) {
+      console.error("Delete failed", err);
+      toast.error(err.message || "Failed to delete product");
+    } finally {
+      setIsLoading(false);
     }
-  } catch (err) {
-    console.error("Delete failed", err);
-  }
-};
+  };
 
   return (
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="w-full bg-[#0A0A0A] p-6 my-8 rounded-xl border border-[#222] shadow-lg"
+      className="w-full bg-[#0A0A0A] p-6 my-8 rounded-xl  border border-[#D4AF37] shadow-lg"
     >
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-[#D4AF37]">Edit Product</h2>
@@ -379,7 +322,7 @@ const removeAllImages = async () => {
       </div>
       
       {/* Search Form */}
-      <div className="relative mb-8 bg-[#111] p-4 rounded-lg">
+      <div className="relative mb-8 bg-[#111] p-4 rounded-lg border border-[#D4AF37]/50">
         <div className="relative">
           <input
             type="text"
@@ -395,36 +338,46 @@ const removeAllImages = async () => {
         </div>
 
         {/* Search Results Dropdown */}
-        {showSearchResults && searchResults.length > 0 && (
-          <div className="absolute z-10 mt-2 w-full bg-[#222] border border-[#333] rounded-lg shadow-lg max-h-80 overflow-y-auto">
-            {searchResults.map((result) => (
-              <div
-                key={result._id}
-                onClick={() => selectProduct(result)}
-                className="p-3 hover:bg-[#333] cursor-pointer transition-colors flex items-center gap-3"
-              >
-                {result.images?.[0]?.url && (
-                  <img
-                    src={`${result.images[0].url}?tr=w-100,h-100`}
-                    alt={result.title}
-                    className="w-10 h-10 object-cover rounded"
-                  />
-                )}
-                <div>
-                  <p className="text-[#F6F5F3] font-medium">{result.title}</p>
-                  <p className="text-xs text-[#888]">ID: {result._id} {result.sku && `| SKU: ${result.sku}`}</p>
-                </div>
+        {showSearchResults && (
+          <div className="absolute z-10 mt-2 w-[90%] bg-[#222] border border-[#D4AF37]/50 rounded-lg shadow-lg max-h-80 overflow-y-auto">
+            {searchError ? (
+              <div className="p-4 text-center text-[#F6F5F3]">
+                <p>{searchError}</p>
               </div>
-            ))}
+            ) : searchResults.length > 0 ? (
+              searchResults.map((result) => (
+                <div
+                  key={result._id}
+                  onClick={() => selectProduct(result)}
+                  className="p-3 hover:bg-[#333] border border-[#D4AF37]/50 cursor-pointer transition-colors flex items-center gap-3"
+                >
+                  {result.images?.[0]?.url && (
+                    <img
+                      src={`${result.images[0].url}?tr=w-100,h-100`}
+                      alt={result.title}
+                      className="w-10 h-10 object-cover rounded"
+                    />
+                  )}
+                  <div>
+                    <p className="text-[#F6F5F3] font-medium">{result.title}</p>
+                    <p className="text-xs text-[#888]">ID: {result._id} {result.sku && `| SKU: ${result.sku}`}</p>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="p-4 text-center text-[#F6F5F3]">
+                <p>No products found</p>
+              </div>
+            )}
           </div>
         )}
       </div>
 
       {product ? (
-        <div className="bg-[#111] rounded-lg overflow-hidden">
+        <div className="bg-[#111] rounded-lg  overflow-hidden">
           {/* Navigation Tabs */}
           <div className="border-b border-[#222]">
-            <nav className="flex -mb-px items-center ">
+            <nav className="flex -mb-px items-center">
               <button
                 onClick={() => setActiveTab("basic")}
                 className={`py-4 px-6 font-medium text-sm border-b-2 transition-colors ${activeTab === "basic" ? "border-[#D4AF37] text-[#D4AF37]" : "border-transparent text-[#888] hover:text-[#D4AF37]"}`}
@@ -450,12 +403,19 @@ const removeAllImages = async () => {
                 Organization
               </button>
               <button
-  onClick={()=>handleDelete(product._id)}
-  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded "
->
-  Delete Product
-</button>
-
+                onClick={() => handleDelete(product._id)}
+                className="ml-auto bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded flex items-center gap-2"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <Loader2 className="animate-spin w-4 h-4" />
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4" />
+                    Delete Product
+                  </>
+                )}
+              </button>
             </nav>
           </div>
 
@@ -470,12 +430,12 @@ const removeAllImages = async () => {
                       name="title"
                       value={product.title}
                       onChange={handleChange}
-                      className="w-full bg-[#222] border border-[#333] rounded-lg px-4 py-3 text-[#F6F5F3] focus:outline-none focus:ring-2 focus:ring-[#D4AF37] transition-all"
+                      className="w-full border border-[#D4AF37]/50 bg-[#222]  rounded-lg px-4 py-3 text-[#F6F5F3] focus:outline-none focus:ring-2 focus:ring-[#D4AF37] transition-all"
                       required
                     />
                   </div>
                   <div>
-                    <div className="flex justify-between items-center mb-2">
+                    <div className="flex justify-between items-center mb-2 ">
                       <label className="block text-sm font-medium text-[#F6F5F3]">Slug*</label>
                       <button
                         type="button"
@@ -489,7 +449,7 @@ const removeAllImages = async () => {
                       name="slug"
                       value={product.slug}
                       onChange={handleChange}
-                      className="w-full bg-[#222] border border-[#333] rounded-lg px-4 py-3 text-[#F6F5F3] focus:outline-none focus:ring-2 focus:ring-[#D4AF37] transition-all"
+                      className="w-full border border-[#D4AF37]/50 bg-[#222]  rounded-lg px-4 py-3 text-[#F6F5F3] focus:outline-none focus:ring-2 focus:ring-[#D4AF37] transition-all"
                       required
                     />
                   </div>
@@ -501,7 +461,7 @@ const removeAllImages = async () => {
                     name="description"
                     value={product.description}
                     onChange={handleChange}
-                    className="w-full bg-[#222] border border-[#333] rounded-lg px-4 py-3 text-[#F6F5F3] min-h-[150px] focus:outline-none focus:ring-2 focus:ring-[#D4AF37] transition-all"
+                    className="w-full bg-[#222] border border-[#D4AF37]/50 rounded-lg px-4 py-3 text-[#F6F5F3] min-h-[150px] focus:outline-none focus:ring-2 focus:ring-[#D4AF37] transition-all"
                     required
                   />
                 </div>
@@ -516,7 +476,7 @@ const removeAllImages = async () => {
                         type="number"
                         value={product.price}
                         onChange={handleChange}
-                        className="w-full bg-[#222] border border-[#333] rounded-lg pl-10 pr-4 py-3 text-[#F6F5F3] focus:outline-none focus:ring-2 focus:ring-[#D4AF37] transition-all"
+                        className="w-full bg-[#222] border border-[#D4AF37]/50 rounded-lg pl-10 pr-4 py-3 text-[#F6F5F3] focus:outline-none focus:ring-2 focus:ring-[#D4AF37] transition-all"
                         min="0"
                         step="0.01"
                         required
@@ -526,13 +486,13 @@ const removeAllImages = async () => {
                   <div>
                     <label className="block text-sm font-medium text-[#F6F5F3] mb-2">Discount Price</label>
                     <div className="relative">
-                      <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-[#D4AF37]">$</span>
+                      <span className="absolute inset-y-0  left-0 flex items-center pl-3 text-[#D4AF37]">$</span>
                       <input
                         name="discountPrice"
                         type="number"
                         value={product.discountPrice || ""}
                         onChange={handleChange}
-                        className="w-full bg-[#222] border border-[#333] rounded-lg pl-10 pr-4 py-3 text-[#F6F5F3] focus:outline-none focus:ring-2 focus:ring-[#D4AF37] transition-all"
+                        className="w-full bg-[#222] border border border-[#D4AF37]/50 border-[#333] rounded-lg pl-10 pr-4 py-3 text-[#F6F5F3] focus:outline-none focus:ring-2 focus:ring-[#D4AF37] transition-all"
                         min="0"
                         step="0.01"
                         placeholder="Optional"
@@ -546,7 +506,7 @@ const removeAllImages = async () => {
             {/* Media Tab */}
             {activeTab === "media" && (
               <div className="space-y-6">
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center ">
                   <div>
                     <h3 className="text-lg font-medium text-[#F6F5F3]">Product Images</h3>
                     <p className="text-sm text-[#888]">Upload high-quality product images</p>
@@ -604,7 +564,7 @@ const removeAllImages = async () => {
                           </div>
                           <button
                             type="button"
-                            onClick={() => removeImage(image._id)}
+                            onClick={() => removeImage(image.fileId)}
                             className="absolute top-2 right-2 bg-[#5A1A17] text-[#F6F5F3] p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -638,7 +598,7 @@ const removeAllImages = async () => {
                       type="number"
                       value={product.stockQuantity}
                       onChange={handleChange}
-                      className="w-full bg-[#222] border border-[#333] rounded-lg px-4 py-3 text-[#F6F5F3] focus:outline-none focus:ring-2 focus:ring-[#D4AF37] transition-all"
+                      className="w-full border border-[#D4AF37]/50 bg-[#222] border border-[#333] rounded-lg px-4 py-3 text-[#F6F5F3] focus:outline-none focus:ring-2 focus:ring-[#D4AF37] transition-all"
                       min="0"
                       required
                     />
@@ -653,12 +613,12 @@ const removeAllImages = async () => {
                       <button
                         type="button"
                         onClick={() => setShowSizes(!showSizes)}
-                        className="w-full bg-[#222] border border-[#333] rounded-lg px-4 py-3 text-left flex justify-between items-center hover:bg-[#1a1a1a] transition-colors"
+                        className="w-full bg-[#222] border border-[#333] border border-[#D4AF37]/50 rounded-lg px-4 py-3 text-left flex justify-between items-center hover:bg-[#1a1a1a] transition-colors"
                       >
                         <span className={product.sizes.length ? "text-[#F6F5F3]" : "text-[#888]"}>
                           {product.sizes.length > 0 
                             ? product.sizes.join(", ") 
-                            : "Select sizes"}
+                            : "Select sizes "}
                         </span>
                         <ChevronDown className={`w-4 h-4 transition-transform ${showSizes ? 'rotate-180' : ''}`} />
                       </button>
@@ -670,7 +630,7 @@ const removeAllImages = async () => {
                               key={size}
                               type="button"
                               onClick={() => toggleSize(size)}
-                              className={`px-3 py-2 rounded text-sm flex items-center gap-2 justify-center ${
+                              className={`px-3 py-2 border border-[#D4AF37]/50 rounded text-sm flex items-center gap-2 justify-center ${
                                 product.sizes.includes(size)
                                   ? 'bg-[#D4AF37] text-[#0A0A0A] font-medium'
                                   : 'bg-[#222] text-[#F6F5F3] hover:bg-[#333]'
@@ -692,7 +652,7 @@ const removeAllImages = async () => {
                       <button
                         type="button"
                         onClick={() => setShowColors(!showColors)}
-                        className="w-full bg-[#222] border border-[#333] rounded-lg px-4 py-3 text-left flex justify-between items-center hover:bg-[#1a1a1a] transition-colors"
+                        className="w-full bg-[#222] border border-[#D4AF37]/50 rounded-lg px-4 py-3 text-left flex justify-between items-center hover:bg-[#1a1a1a] transition-colors"
                       >
                         <div className="flex items-center gap-2">
                           {product.colors.length > 0 ? (
@@ -760,7 +720,7 @@ const removeAllImages = async () => {
                       name="category"
                       value={product.category}
                       onChange={handleChange}
-                      className="w-full bg-[#222] border border-[#333] rounded-lg px-4 py-3 text-[#F6F5F3] focus:outline-none focus:ring-2 focus:ring-[#D4AF37] transition-all appearance-none"
+                      className="w-full bg-[#222] border border-[#D4AF37]/50 rounded-lg px-4 py-3 text-[#F6F5F3] focus:outline-none focus:ring-2 focus:ring-[#D4AF37] transition-all appearance-none"
                       required
                     >
                       <option value="">Select Category</option>
@@ -775,7 +735,7 @@ const removeAllImages = async () => {
                       name="subcategory"
                       value={product.subcategory}
                       onChange={handleChange}
-                      className="w-full bg-[#222] border border-[#333] rounded-lg px-4 py-3 text-[#F6F5F3] focus:outline-none focus:ring-2 focus:ring-[#D4AF37] transition-all appearance-none"
+                      className="w-full bg-[#222] border border-[#D4AF37]/50 rounded-lg px-4 py-3 text-[#F6F5F3] focus:outline-none focus:ring-2 focus:ring-[#D4AF37] transition-all appearance-none"
                       required
                     >
                       <option value="">Select Subcategory</option>
@@ -792,7 +752,7 @@ const removeAllImages = async () => {
                   <p className="text-sm text-[#888] mb-3">Add tags to help customers find your product</p>
                   <div className="flex flex-wrap gap-2 mb-3">
                     {product.tags.map((tag,index) => (
-                      <div key={index} className="bg-[#222] border border-[#333] rounded-full px-3 py-1 flex items-center gap-1">
+                      <div key={index} className="bg-[#222] border border-[#D4AF37]/50 rounded-full px-3 py-1 flex items-center gap-1">
                         <span className="text-sm text-[#F6F5F3]">{tag}</span>
                         <button
                           type="button"
@@ -810,14 +770,14 @@ const removeAllImages = async () => {
                       name="newTag"
                       placeholder="Add new tag (press Enter)"
                       onKeyDown={addTag}
-                      className="flex-1 bg-[#222] border border-[#333] rounded-lg px-4 py-2 text-[#F6F5F3] focus:outline-none focus:ring-2 focus:ring-[#D4AF37] transition-all"
+                      className="flex-1 bg-[#222] border w-full min-w-0  border-[#D4AF37]/50 rounded-lg md:px-4  md:py-2 px-1 py-0 text-[#F6F5F3] focus:outline-none focus:ring-2 focus:ring-[#D4AF37] transition-all"
                     />
                     <button
                       type="button"
                       onClick={addTag}
                       className="bg-[#D4AF37] text-[#0A0A0A] px-4 py-2 rounded-lg hover:bg-[#C9A227] transition-colors flex items-center gap-1"
                     >
-                      <Plus className="w-4 h-4" />
+                      <Plus className="md:w-4 md:h-4 w-2 h-2" />
                       Add
                     </button>
                   </div>
@@ -825,7 +785,7 @@ const removeAllImages = async () => {
 
                 {/* Status */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
-                  <div className="flex items-center gap-3 p-3 bg-[#222] rounded-lg">
+                  <div className="flex items-center gap-3 p-3 border border-[#D4AF37]/50 bg-[#222] rounded-lg">
                     <div className="flex items-center h-5">
                       <input
                         type="checkbox"
@@ -836,14 +796,14 @@ const removeAllImages = async () => {
                         className="h-4 w-4 rounded border-[#D4AF37] bg-[#333] text-[#D4AF37] focus:ring-[#D4AF37]"
                       />
                     </div>
-                    <div>
-                      <label htmlFor="isFeatured" className="text-sm font-medium text-[#F6F5F3]">
+                    <div className="">
+                      <label htmlFor="isFeatured" className="text-sm  font-medium text-[#F6F5F3]">
                         Featured Product
                       </label>
                       <p className="text-xs text-[#888]">Show this product in featured sections</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 p-3 bg-[#222] rounded-lg">
+                  <div className="flex border border-[#D4AF37]/50 items-center gap-3 p-3 bg-[#222] rounded-lg">
                     <div className="flex items-center h-5">
                       <input
                         type="checkbox"
@@ -870,7 +830,12 @@ const removeAllImages = async () => {
               <div className="flex justify-end gap-3">
                 <button
                   type="button"
-                  onClick={() => setProduct(null)}
+                  onClick={() => {
+                    setProduct(null);
+                    setSearchTerm("");
+                    setSearchResults([]);
+                    setSearchError(null);
+                  }}
                   className="bg-transparent border border-[#333] text-[#F6F5F3] px-6 py-2 rounded-lg hover:bg-[#222] transition-colors"
                 >
                   Cancel

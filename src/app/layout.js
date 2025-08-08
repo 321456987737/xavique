@@ -2,6 +2,8 @@ import "./globals.css";
 import Navbar from "@/components/main/navbar/navbar";
 import Provider from "@/components/provider";
 import Footer from "@/components/main/footer/footer";
+import { Toaster } from 'react-hot-toast';
+
 export const metadata = {
   icons:{
     icon: "/xaviquesm.png"
@@ -17,7 +19,7 @@ export default function RootLayout({ children }) {
         <Provider>
         <Navbar />
         {children}
-     
+     <Toaster position="bottom-right" reverseOrder={false} />
         <Footer />
         </Provider>
       </body>
