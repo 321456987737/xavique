@@ -19,6 +19,7 @@
     "embla-carousel-react": "^8.6.0",
     "imagekit": "^6.0.0",
     "imagekit-javascript": "^4.0.1",
+    "imagekitio-react": "^4.3.0",
     "lucide-react": "^0.536.0",
     "mongoose": "^8.17.0",
     "motion": "^12.23.12",
@@ -28,7 +29,8 @@
     "react-dom": "19.1.0",
     "react-hook-form": "^7.62.0",
     "react-hot-toast": "^2.5.2",
-    "zod": "^4.0.14"
+    "zod": "^4.0.14",
+    "zustand": "^5.0.7"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

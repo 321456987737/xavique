@@ -43,7 +43,7 @@ export default function Searchbar({ onClose }) {
       <>
         {/* Background Overlay */}
         <motion.div
-          className="fixed inset-0 bg-black/70 backdrop-blur-md z-40"
+          className="fixed inset-0 bg-black/70 backdrop-blur-md z-99"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -53,7 +53,7 @@ export default function Searchbar({ onClose }) {
         {/* Search Bar */}
         <motion.div
           ref={wrapperRef}
-          className="fixed top-[15%] left-1/2 -translate-x-1/2 z-50 w-[95vw] max-w-3xl"
+          className="fixed top-[15%] left-1/2 -translate-x-1/2 z-[100] w-[95vw] max-w-3xl"
           initial={{ opacity: 0, scale: 0.95, y: -40 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: -40 }}

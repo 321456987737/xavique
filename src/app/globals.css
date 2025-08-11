@@ -25,3 +25,28 @@
   opacity: 1;
   z-index: 10;
 }
+/* Embla Carousel base styles */
+.embla {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+}
+.embla__container {
+  display: flex;
+  height: 100%;
+}
+.embla__slide {
+  position: relative;
+  flex: 0 0 100%;
+  min-width: 0;
+}
+
+/* Smooth transitions */
+.transition-smooth {
+  transition: all 0.3s ease;
+}
+
+/* Hover effects */
+.group:hover .group-hover\:underline {
+  text-decoration: underline;
+}
