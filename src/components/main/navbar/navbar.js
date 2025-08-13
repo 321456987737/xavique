@@ -50,9 +50,9 @@ const Navbar = () => {
         className="h-[80px] flex flex-col fixed top-0 bg-gradient-to-r from-[#0A0A0A] via-[#1A1A1A] to-[#0A0A0A] backdrop-blur-md border-b border-[#D4AF37]/20 w-full text-white z-50 "
       >
         {/* Top Row with 3 sections */}
-        <div className="flex items-center justify-between w-full h-full px-4 md:px-8 ">
+        <div className="flex items-center justify-between w-full h-full px-4 md:px-8  ">
           {/* Left: Menu & Search */}
-          <div className="flex items-center w-1/3 md:min-w-[200px]">
+          <div className="flex  items-center w-1/3 md:min-w-[200px]">
             <motion.button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="group relative p-2 md:p-3 rounded-full hover:bg-[#D4AF37]/10 transition-all duration-300"

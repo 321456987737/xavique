@@ -170,6 +170,7 @@ export default function FullScreenCategoryMenu({ onClose }) {
   const [isMobile, setIsMobile] = useState(false);
   const containerRef = useRef(null);
   
+  
   // Track scroll positions for back navigation
   const scrollPositions = useRef({
     category: 0,
@@ -241,6 +242,11 @@ export default function FullScreenCategoryMenu({ onClose }) {
     setSelectedSub(sub);
   };
 
+  // import React, { useEffect, useState, useRef } from "react";
+  // import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
+  // import { ChevronRight, ChevronLeft, X, Menu } from "lucide-react";
+  // import Link from "next/link";
+  // import { useRouter } from "next/navigation";
   // Handle subsubcategory selection
   const handleSubsubcategorySelect = (item) => {
     handleNavigation(selectedCategory.label, selectedSub.label, item);
@@ -269,31 +275,33 @@ export default function FullScreenCategoryMenu({ onClose }) {
   };
 
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence
+    //  mode="wait"
+     >
       {/* Backdrop with subtle gradient */}
       <motion.div
+        className="fixed inset-0 z-[99] bg-gradient-to-br from-black/50 to-[#0a0a0a]/30 backdrop-blur-md"
         key="backdrop"
         initial={{ opacity: 0 }}
         animate={{ opacity: 0.5 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-        className="fixed inset-0 z-[98] bg-gradient-to-br from-black/50 to-[#0a0a0a]/30 backdrop-blur-md"
         onClick={onClose}
       />
 
       {/* Desktop Menu */}
       {!isMobile && (
         <motion.div
+        className="fixed  inset-0 z-[99]"
           ref={containerRef}
           key="desktop"
-          className="fixed inset-0 z-[99]"
           initial={{ x: "-100%" }}
           animate={{ x: 0 }}
           exit={{ x: "-100%" }}
           transition={{
             type: "spring",
-            damping: 28,
-            stiffness: 250,
+            damping: 30,
+            stiffness: 300,
             mass: 0.8
           }}
         >
@@ -578,12 +586,12 @@ export default function FullScreenCategoryMenu({ onClose }) {
         <motion.div
           key="mobile"
           className="fixed inset-0 z-[99]"
-          initial={{ x: "100%" }}
+          initial={{ x: "-100%" }}
           animate={{ x: 0 }}
           exit={{ x: "100%" }}
           transition={{
             type: "spring",
-            damping: 30,
+            damping: 38,
             stiffness: 300,
             mass: 0.8
           }}
@@ -805,12 +813,7 @@ export default function FullScreenCategoryMenu({ onClose }) {
 }
 // "use client";
 
-// import React, { useEffect, useState, useRef } from "react";
-// import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
-// import { ChevronRight, ChevronLeft, X, Menu } from "lucide-react";
-// import Link from "next/link";
-// import { useRouter } from "next/navigation";
-
+  
 // // Categories data
 // const categories = [
 //   {
