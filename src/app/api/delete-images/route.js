@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import imageKitConfig from '@/lib/imagekit';
+import imageKitConfig from '@/app/api/imagekit-auth/route';
 import { dbConnect } from '@/lib/db';
 import Product from '@/model/Product';
 
