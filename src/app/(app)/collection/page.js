@@ -4,7 +4,7 @@ import { Suspense } from "react";
 export default function CollectionPage() {
   return (
     <Suspense fallback={<div>Loading...</div>}>
-    <div className="min-h-screen bg-[#0A0A0A] text-white pt-[120px] pb-20 px-4 sm:px-8">
+    <div className="min-h-screen bg-[#0A0A0A] text-white  pb-20 px-4 sm:px-8">
       
       <Collection />
     </div>
