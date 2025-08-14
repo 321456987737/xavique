@@ -74,7 +74,7 @@ export default function CartPage() {
         </div>
       ) : (
         <>
-          <div className="w-[55%] mx-auto space-y-6">
+          <div className="md:w-[55%] w-[95%]  mx-auto space-y-6">
             <AnimatePresence>
               {cart.map((item) => (
                 <motion.div
