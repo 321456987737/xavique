@@ -1,4 +1,3 @@
-// store/cartStore.js
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -30,10 +29,7 @@ export const useCartStore = create(
         } else {
           // Add new entry with selected options
           set({
-            cart: [
-              ...cart,
-              { ...product, qty, selectedOptions },
-            ],
+            cart: [...cart, { ...product, qty, selectedOptions }],
           });
         }
       },
@@ -65,9 +61,7 @@ export const useCartStore = create(
 
       clearCart: () => set({ cart: [] }),
     }),
-    {
-      name: "cart-storage", // key in localStorage
-    }
+    { name: "cart-storage" }
   )
 );
 
@@ -80,32 +74,58 @@ export const useCartStore = create(
 //     (set, get) => ({
 //       cart: [],
 
-//       addToCart: (product, qty = 1) => {
+//       addToCart: (product, qty = 1, selectedOptions = {}) => {
 //         const cart = get().cart;
-//         const existing = cart.find((item) => item._id === product._id);
+//         const existing = cart.find(
+//           (item) =>
+//             item._id === product._id &&
+//             item.selectedOptions.color === selectedOptions.color &&
+//             item.selectedOptions.size === selectedOptions.size
+//         );
 
 //         if (existing) {
-//           // update quantity
+//           // If same product with same options exists → increase quantity
 //           set({
 //             cart: cart.map((item) =>
-//               item._id === product._id
+//               item._id === product._id &&
+//               item.selectedOptions.color === selectedOptions.color &&
+//               item.selectedOptions.size === selectedOptions.size
 //                 ? { ...item, qty: item.qty + qty }
 //                 : item
 //             ),
 //           });
 //         } else {
-//           set({ cart: [...cart, { ...product, qty }] });
+//           // Add new entry with selected options
+//           set({
+//             cart: [
+//               ...cart,
+//               { ...product, qty, selectedOptions },
+//             ],
+//           });
 //         }
 //       },
 
-//       removeFromCart: (id) => {
-//         set({ cart: get().cart.filter((item) => item._id !== id) });
+//       removeFromCart: (id, selectedOptions = {}) => {
+//         set({
+//           cart: get().cart.filter(
+//             (item) =>
+//               !(
+//                 item._id === id &&
+//                 item.selectedOptions.color === selectedOptions.color &&
+//                 item.selectedOptions.size === selectedOptions.size
+//               )
+//           ),
+//         });
 //       },
 
-//       updateQuantity: (id, qty) => {
+//       updateQuantity: (id, qty, selectedOptions = {}) => {
 //         set({
 //           cart: get().cart.map((item) =>
-//             item._id === id ? { ...item, qty } : item
+//             item._id === id &&
+//             item.selectedOptions.color === selectedOptions.color &&
+//             item.selectedOptions.size === selectedOptions.size
+//               ? { ...item, qty }
+//               : item
 //           ),
 //         });
 //       },
@@ -117,3 +137,50 @@ export const useCartStore = create(
 //     }
 //   )
 // );
+
+// // // store/cartStore.js
+// // import { create } from "zustand";
+// // import { persist } from "zustand/middleware";
+
+// // export const useCartStore = create(
+// //   persist(
+// //     (set, get) => ({
+// //       cart: [],
+
+// //       addToCart: (product, qty = 1) => {
+// //         const cart = get().cart;
+// //         const existing = cart.find((item) => item._id === product._id);
+
+// //         if (existing) {
+// //           // update quantity
+// //           set({
+// //             cart: cart.map((item) =>
+// //               item._id === product._id
+// //                 ? { ...item, qty: item.qty + qty }
+// //                 : item
+// //             ),
+// //           });
+// //         } else {
+// //           set({ cart: [...cart, { ...product, qty }] });
+// //         }
+// //       },
+
+// //       removeFromCart: (id) => {
+// //         set({ cart: get().cart.filter((item) => item._id !== id) });
+// //       },
+
+// //       updateQuantity: (id, qty) => {
+// //         set({
+// //           cart: get().cart.map((item) =>
+// //             item._id === id ? { ...item, qty } : item
+// //           ),
+// //         });
+// //       },
+
+// //       clearCart: () => set({ cart: [] }),
+// //     }),
+// //     {
+// //       name: "cart-storage", // key in localStorage
+// //     }
+// //   )
+// // );

@@ -18,63 +18,38 @@ export default function CartPage() {
   const handleClearCart = () => {
     if (window.confirm("Are you sure you want to clear your entire cart?")) {
       clearCart();
-      toast.success(`Cart cleared`, {
-                  style: {
-                    borderRadius: "8px",
-                    background: "#0A0A0A", // black background
-                    color: "#fff",
-                    fontSize: "14px",
-                    padding: "12px 16px",
-                    border: "1px solid #D4AF37", // gold border
-                  },
-                  iconTheme: {
-                    primary: "#D4AF37", // gold icon color
-                    secondary: "#0A0A0A", // icon background
-                  },
-                });
+      toast.success("Cart cleared", toastStyle);
     }
   };
 
-  const handleRemoveItem = (id) => {
-    removeFromCart(id);
-    toast.success(`Item removed`, {
-                  style: {
-                    borderRadius: "8px",
-                    background: "#0A0A0A", // black background
-                    color: "#fff",
-                    fontSize: "14px",
-                    padding: "12px 16px",
-                    border: "1px solid #D4AF37", // gold border
-                  },
-                  iconTheme: {
-                    primary: "#D4AF37", // gold icon color
-                    secondary: "#0A0A0A", // icon background
-                  },
-                });
+  const handleRemoveItem = (id, selectedOptions) => {
+    removeFromCart(id, selectedOptions);
+    toast.success("Item removed", toastStyle);
   };
 
-  const handleQuantityChange = (id, newQty) => {
+  const handleQuantityChange = (id, newQty, selectedOptions) => {
     if (newQty < 1) return;
-    updateQuantity(id, newQty);
-    toast.success("Quantity updated", {
-                  style: {
-                    borderRadius: "8px",
-                    background: "#0A0A0A", // black background
-                    color: "#fff",
-                    fontSize: "14px",
-                    padding: "12px 16px",
-                    border: "1px solid #D4AF37", // gold border
-                  },
-                  iconTheme: {
-                    primary: "#D4AF37", // gold icon color
-                    secondary: "#0A0A0A", // icon background
-                  },
-                });
+    updateQuantity(id, newQty, selectedOptions);
+    toast.success("Quantity updated", toastStyle);
   };
-  console.log(cart)
+
+  const toastStyle = {
+    style: {
+      borderRadius: "8px",
+      background: "#0A0A0A",
+      color: "#fff",
+      fontSize: "14px",
+      padding: "12px 16px",
+      border: "1px solid #D4AF37",
+    },
+    iconTheme: {
+      primary: "#D4AF37",
+      secondary: "#0A0A0A",
+    },
+  };
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white px-4 py-10  pt-[120px] mx-auto">
+    <div className="min-h-screen bg-[#0A0A0A] text-white px-4 py-10 pt-[120px] mx-auto">
       <div className="flex justify-around items-center mb-8">
         <h1 className="text-3xl font-bold">My Cart</h1>
         {cart.length > 0 && (
@@ -99,13 +74,11 @@ export default function CartPage() {
         </div>
       ) : (
         <>
-        {/* <div className="w-full flex items-center justify-center"> */}
-
           <div className="w-[55%] mx-auto space-y-6">
             <AnimatePresence>
               {cart.map((item) => (
                 <motion.div
-                key={item._id}
+                  key={`${item._id}-${item.selectedOptions.color}-${item.selectedOptions.size}`}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
@@ -130,50 +103,58 @@ export default function CartPage() {
                       <p className="text-[#D4AF37] font-bold mt-1">
                         ${item.discountPrice || item.price}
                       </p>
+                      {/* Show selected options */}
+                      <p className="text-gray-400 text-sm">
+                        {item.selectedOptions.color} / {item.selectedOptions.size}
+                      </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 mt-4 sm:mt-0 ">
-                    <div className="flex items-center border transition-all border-[#443a1a]  hover:border-[#D4AF37] shadow-sm rounded-lg overflow-hidden">
+                  <div className="flex items-center gap-3 mt-4 sm:mt-0">
+                    <div className="flex items-center border transition-all border-[#443a1a] hover:border-[#D4AF37] shadow-sm rounded-lg overflow-hidden">
                       <button
-                        onClick={() => handleQuantityChange(item._id, item.qty - 1)}
-                        className="px-2 py-1  hover:bg-[#D4AF37]/30 transition-colors"
-                        >
+                        onClick={() =>
+                          handleQuantityChange(item._id, item.qty - 1, item.selectedOptions)
+
+                        }
+                        className="px-2 py-1 hover:bg-[#D4AF37]/30 transition-colors"
+                      >
                         <Minus size={14} className="hover:text-[#D4AF37]" />
                       </button>
                       <span className="px-3">{item.qty}</span>
                       <button
-                        onClick={() => handleQuantityChange(item._id, item.qty + 1)}
+                        onClick={() =>
+                          handleQuantityChange(item._id, item.qty + 1, item.selectedOptions)
+                        }
                         className="px-2 py-1 hover:bg-[#D4AF37]/30 transition-colors"
-                        >
+                      >
                         <Plus size={14} className="hover:text-[#D4AF37]" />
                       </button>
                     </div>
                     <button
-                      onClick={() => handleRemoveItem(item._id)}
+                      onClick={() => handleRemoveItem(item._id, item.selectedOptions)}
                       className="text-red-400 hover:text-red-500 transition-colors"
-                      >
+                    >
                       <X size={18} />
                     </button>
                   </div>
                 </motion.div>
               ))}
             </AnimatePresence>
-              </div>
-          {/* </div> */}
+          </div>
 
-          <div className="mt-8 flex flex-col sm:flex-row justify-around  items-center gap-4 border-t border-[#2A2A2A] pt-12">
+          <div className="mt-8 flex flex-col sm:flex-row justify-around items-center gap-4 border-t border-[#2A2A2A] pt-12">
             <h2 className="text-xl font-semibold">
               Total: <span className="text-[#D4AF37]">${total.toFixed(2)}</span>
             </h2>
-                <Link href={"/checkout"}>
-      <button className="group bg-[#D4AF37] cursor-pointer text-black font-semibold px-8 py-3 rounded-2xl hover:bg-[#c39a2f] transition-colors shadow-lg shadow-[#D4AF37]/40 flex items-center gap-2">
-        Checkout 
-        <ArrowRight 
-          size={18} 
-          className="transition-transform duration-300 group-hover:translate-x-2" 
-        />
-      </button>
-    </Link>
+            <Link href={"/checkout"}>
+              <button className="group bg-[#D4AF37] cursor-pointer text-black font-semibold px-8 py-3 rounded-2xl hover:bg-[#c39a2f] transition-colors shadow-lg shadow-[#D4AF37]/40 flex items-center gap-2">
+                Checkout
+                <ArrowRight
+                  size={18}
+                  className="transition-transform duration-300 group-hover:translate-x-2"
+                />
+              </button>
+            </Link>
           </div>
         </>
       )}
