@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { dbConnect } from '@/lib/db';
 import Product from '@/model/Product';
-import imageKitConfig from '@/app/api/imagekit-auth/';
+import imageKitConfig from '@/app/api/imagekit-auth/route';
 export async function PUT(request, { params }) {
   try {
     console.log('hello 1')
