@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { dbConnect } from '@/lib/db';
 import Product from '@/model/Product';
-import imagekit from '@/app/api/imagekit-auth/route';
+import imageKitConfig from '@/app/api/imagekit-auth/';
 export async function PUT(request, { params }) {
   try {
     console.log('hello 1')
@@ -47,7 +47,7 @@ export async function DELETE(req, { params }) {
     if (product.images?.length) {
       for (const img of product.images) {
         if (img.id) {
-          await imagekit.deleteFile(img.id);
+          await imageKitConfig.deleteFile(img.id);
         }
       }
     }
