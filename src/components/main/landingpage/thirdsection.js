@@ -3,59 +3,60 @@ import React from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 const products = [
   {
-    id: 1,
+    id: "6896dc132a678f7b78a6a663",
     title: "Elegant Leather Bag",
     price: "$249",
     bg: "bg-pink-200",
     img: "/design_a_bold_high_fashion_statement_bag_for (1).jpeg",
   },
   {
-    id: 2,
+    id: "6896dc132a678f7b78a6a663",
     title: "Vintage Tote",
     price: "$179",
     bg: "bg-red-200",
     img: "/Pokecut_1754397204814.jpg",
   },
   {
-    id: 3,
+    id: "6896dc132a678f7b78a6a663",
     title: "Luxury Handbag",
     price: "$299",
     bg: "bg-yellow-200",
     img: "/design_a_bold_high_fashion_statement_bag_for2.jpg",
   },
   {
-    id: 4,
+    id: "6896dc132a678f7b78a6a663",
     title: "Elegant Leather Bag",
     price: "$249",
     bg: "bg-pink-200",
     img: "/design_a_bold_high_fashion_statement_bag_for (1).jpeg",
   },
   {
-    id: 5,
+    id: "6896dc132a678f7b78a6a663",
     title: "Vintage Tote",
     price: "$179",
     bg: "bg-red-200",
     img: "/Pokecut_1754397204814.jpg",
   },
   {
-    id: 6,
+    id: "6896dc132a678f7b78a6a663",
     title: "Luxury Handbag",
     price: "$299",
     bg: "bg-yellow-200",
     img: "/design_a_bold_high_fashion_statement_bag_for2.jpg",
   },
   {
-    id: 7,
+    id: "6896dc132a678f7b78a6a663",
     title: "Elegant Leather Bag",
     price: "$249",
     bg: "bg-pink-200",
     img: "/design_a_bold_high_fashion_statement_bag_for (1).jpeg",
   },
   {
-    id: 8,
+    id: "6896dc132a678f7b78a6a663",
     title: "Vintage Tote",
     price: "$179",
     bg: "bg-red-200",
@@ -104,7 +105,7 @@ const Thirdsection = () => {
                 <div className="grid grid-cols-2 gap-4 px-4">
                   {sectionProducts.map((product, i) => (
                     <motion.div
-                      key={product.id}
+                      key={i}
                       initial={{ opacity: 0, y: 40 }}
                       whileInView={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.1, duration: 0.5 }}
@@ -134,6 +135,8 @@ const Thirdsection = () => {
                                 {product.price}
                               </p>
                             </div>
+                            <Link href={`/singleproduct/${product.id}`}>
+                            </Link>
                             <button className="text-xs px-3 py-1.5 rounded-full border border-white/20 text-white bg-white/10 hover:text-[#D4AF37] hover:border-[#D4AF37] hover:bg-[#D4AF37]/10 transition-all">
                               View
                             </button>
@@ -152,12 +155,14 @@ const Thirdsection = () => {
                   viewport={{ once: true }}
                   className="mt-24 mb-12 flex justify-center"
                 >
+                  <Link href={"/collection?category=women"}>
                   <button
                     onClick={() => router.push(`/section/${index}`)}
                     className="px-6 py-2 text-sm font-medium rounded-full border border-white/20 text-white bg-white/10 hover:text-[#D4AF37] hover:border-[#D4AF37] hover:bg-[#D4AF37]/10 transition-all"
-                  >
+                    >
                     Discover This Section
                   </button>
+                    </Link>
                 </motion.div>
               </div>
             </div>
@@ -189,7 +194,7 @@ const Thirdsection = () => {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                     {sectionProducts.map((product, i) => (
                       <motion.div
-                        key={product.id}
+                        key={i}
                         initial={{ opacity: 0, y: 40 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.1, duration: 0.5 }}
@@ -219,9 +224,11 @@ const Thirdsection = () => {
                                   {product.price}
                                 </p>
                               </div>
+                              <Link href={`/singleproduct/${product.id}`}>
                               <button className="text-xs px-4 py-2 rounded-full border border-white/20 text-white bg-white/10 hover:text-[#D4AF37] hover:border-[#D4AF37] hover:bg-[#D4AF37]/10 transition-all">
                                 View
                               </button>
+                              </Link>
                             </div>
                           </div>
                         </motion.div>
@@ -236,13 +243,14 @@ const Thirdsection = () => {
                     transition={{ delay: 0.4, duration: 0.5 }}
                     viewport={{ once: true }}
                     className="mt-24 mb-12 flex justify-center"
-                  >
+                  >         <Link href={"/collection?category=women"}>
                     <button
                       onClick={() => router.push(`/section/${index}`)}
                       className="px-6 py-2 text-sm font-medium rounded-full border border-white/20 text-white bg-white/10 hover:text-[#D4AF37] hover:border-[#D4AF37] hover:bg-[#D4AF37]/10 transition-all"
                     >
                       Discover This Section
                     </button>
+                    </Link>
                   </motion.div>
                 </div>
               </section>
