@@ -16,7 +16,7 @@ export default function ProductCard({ product, router }) {
     <div className="relative hover:scale-101 hover:z-10 transition-all group">
       <div
         onClick={() => router.push(`/singleproduct/${product._id}`)}
-        className=" rounded-2xl hover:shadow-[0_0_20px_#D4AF37] shadow-[#D4AF37] hover:border  hover:border-[#D4AF37] relative overflow-hidden aspect-[3/4] cursor-pointer"
+        className=" rounded-xl hover:shadow-[0_0_20px_#D4AF37] shadow-[#D4AF37] hover:border  hover:border-[#D4AF37] relative overflow-hidden aspect-[3/4] cursor-pointer"
       >
         {/* Top Right Icons */}
         <div className="absolute top-3 right-3 z-20 flex gap-2">

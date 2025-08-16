@@ -91,12 +91,12 @@ const Extracards = ({ category, subcategory, currentproductid }) => {
       {filteredProducts.map((product) => (
         <motion.div
           key={product._id}
-          className="relative hover:scale-101 hover:z-10 transition-all group"
+          className="relative rounded-2xl hover:scale-101 hover:z-10 transition-all group"
           variants={cardVariants}
         >
           <div
             onClick={() => router.push(`/singleproduct/${product._id}`)}
-            className="relative overflow-hidden aspect-[3/4] cursor-pointer"
+            className="relative rounded-2xl hover:border hover:border-[#D4AF37] hover:shadow-[0_0_20px_#D4AF37] shadow-[#D4AF37] border-white transiton-all  overflow-hidden aspect-[3/4] cursor-pointer"
           >
             <button
               onClick={(e) => {

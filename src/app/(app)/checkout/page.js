@@ -160,7 +160,7 @@ export default function CheckoutPage() {
                           value={formData.country}
                           onChange={handleChange}
                           required
-                          className="w-full outline-none px-4 py-3 bg-[#0A0A0A] text-white border border-gray-700 rounded-lg focus:ring-2 focus:ring-[#D4AF37] focus:border-[#D4AF37] transition-all duration-200"
+                          className="w-full outline-none px-4 py-3 mr-12 bg-[#0A0A0A] text-white border border-gray-700 rounded-lg focus:ring-2 focus:ring-[#D4AF37] focus:border-[#D4AF37] transition-all duration-200"
                         >
                           <option value="Pakistan">Pakistan</option>
                           <option value="USA">United States</option>
