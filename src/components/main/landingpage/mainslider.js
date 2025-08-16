@@ -18,7 +18,7 @@ const slidesData = [
     title: "Bold & Iconic",
     subtitle: "Unleash your style with standout pieces",
     buttonText: "Explore Collection",
-    link: "/collection/",
+    link: "/collection",
   },
   {
     image: "/third.jpeg",

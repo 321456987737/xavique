@@ -8,49 +8,49 @@ const Topsuggestions = () => {
   const cards = [
     {
       BgColor: "bg-green-400",
-      category: "men",
+      category: "Men",
       subcategory: "jewelery",
       image: "/a_men_jewelry_with_dark_theme_bg.jpeg",
     },
     {
       BgColor: "bg-cyan-400",
-      category: "men",
+      category: "Men",
       subcategory: "shoes",
       image: "/a_men_shoe_like_clark_shoe_boats.jpeg",
     },
     {
       BgColor: "bg-red-400",
-      category: "men",
+      category: "Men",
       subcategory: "perfumes",
       image: "/create_an_image_of_men_perfume_that.jpeg",
     },
     {
       BgColor: "bg-pink-400",
-      category: "women",
-      subcategory: "begs",
+      category: "Women",
+      subcategory: "jewelery",
       image: "/create_an_image_of_women_jewelery_that.jpeg",
     },
     {
       BgColor: "bg-yellow-400",
-      category: "women",
+      category: "Women",
       subcategory: "hign heels",
       image: "/create_an_image_of_women_high_heels.jpeg",
     },
     {
       BgColor: "bg-orange-400",
-      category: "women",
+      category: "Women",
       subcategory: "dress",
       image: "/design_a_high_fashion_luxury_women_s_dress_inspired.jpeg",
     },
     {
       BgColor: "bg-gray-400",
-      category: "women",
+      category: "Women",
       subcategory: "bags",
       image: "/create_an_image_of_women_hand_bag.jpeg",
     },
     {
       BgColor: "bg-slate-400",
-      category: "men",
+      category: "Men",
       subcategory: "caps",
       image: "/design_a_large_elegant_women_s_fashion_cap.jpeg",
     },
@@ -79,7 +79,7 @@ const Topsuggestions = () => {
               viewport={{ once: true }}
             >
               <Link
-                href={`/${card.category}/${card.subcategory}`}
+                href={`collection?category=${card.category}&subcategory=${card.subcategory}`}
                 className="relative group rounded-xl overflow-hidden shadow-lg border border-[#D4AF37]/10 hover:scale-[1.03] transition-transform duration-300"
               >
                 <div className="w-full h-[280px] relative">
