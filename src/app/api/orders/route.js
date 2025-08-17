@@ -1,11 +1,11 @@
 // app/api/orders/route.js
 import Order from '@/model/Order';
 import { NextResponse } from 'next/server';
-
+import { dbConnect } from '@/lib/db';
 export async function POST(request) {
   try {
     const { customer, items, total, paymentMethod, stripeSessionId } = await request.json();
-
+   await dbConnect()
     const order = await Order.order.create({
       data: {
         customer: JSON.stringify(customer),
