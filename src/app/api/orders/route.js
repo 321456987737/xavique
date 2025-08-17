@@ -7,7 +7,8 @@ export async function POST(request) {
      await dbConnect()
      console.log(1)
     const { customer, items, total, paymentMethod, stripeSessionId } = await request.json();
-     console.log(1,customer,items,total,paymentMethod,stripeSessionId)
+     console.log(1)
+     console.log("customer",customer,"items",items,"total",total,"paymentMethod",paymentMethod,"stripeSessionId",stripeSessionId)
 
     const order = await Order.create({
       data: {
