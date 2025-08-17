@@ -1,29 +1,49 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useCartStore } from "@/store/cartStore";
+import Link from "next/link";
 
 export default function OrderSuccessPage() {
   const { clearCart } = useCartStore();
+  const [order, setOrder] = useState(null);
+  const [loading, setLoading] = useState(true);
   
   useEffect(() => {
     clearCart();
     
-    // Retrieve session ID from URL
-    const query = new URLSearchParams(window.location.search);
-    const sessionId = query.get('session_id');
-    
-    if (sessionId) {
-      console.log("Stripe payment successful. Session ID:", sessionId);
-      // Here you would typically send the session ID to your backend
-      // to verify the payment and create an order record
-    }
+    const fetchOrder = async () => {
+      try {
+        const query = new URLSearchParams(window.location.search);
+        const sessionId = query.get('session_id');
+        
+        if (sessionId) {
+          const response = await fetch(`/api/orders?sessionId=${sessionId}`);
+          const orderData = await response.json();
+          setOrder(orderData);
+        }
+      } catch (error) {
+        console.error("Error fetching order:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrder();
   }, [clearCart]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen pt-[120px] bg-[#0A0A0A] py-12 px-4 flex items-center justify-center">
+        <div className="text-white text-xl">Loading order details...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen pt-[120px] bg-[#0A0A0A] py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto text-center">
+      <div className="max-w-3xl mx-auto">
+
         <div className="flex justify-center mb-8">
           <div className="flex items-center">
             <div className="bg-gradient-to-r from-[#D4AF37] to-[#F5E8B5] w-10 h-10 rounded-full flex items-center justify-center mr-3">
@@ -50,6 +70,26 @@ export default function OrderSuccessPage() {
               ></path>
             </svg>
           </div>
+          {order && (
+            <div className="text-left mb-6">
+              <div className="mb-4">
+                <h2 className="text-xl font-semibold text-[#D4AF37] mb-2">Order Summary</h2>
+                <p className="text-gray-300">Order #: {order.id}</p>
+                <p className="text-gray-300">Total: ${order.total.toFixed(2)}</p>
+                <p className="text-gray-300">Payment Method: {order.paymentMethod}</p>
+                <p className="text-gray-300">Status: {order.status}</p>
+              </div>
+              
+              <div>
+                <h2 className="text-xl font-semibold text-[#D4AF37] mb-2">Shipping To</h2>
+                <p className="text-gray-300">
+                  {JSON.parse(order.customer).name}<br />
+                  {JSON.parse(order.customer).address.line1}<br />
+                  {JSON.parse(order.customer).address.city}, {JSON.parse(order.customer).address.country}
+                </p>
+              </div>
+            </div>
+          )}
           
           <h1 className="text-3xl font-bold text-white mb-4">
             Order Confirmed!

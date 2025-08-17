@@ -50,15 +50,76 @@ export default function CheckoutPage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleCashOrder = () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      alert("Order placed! Cash payment will be collected on delivery.");
-      clearCart();
-      setIsLoading(false);
-      window.location.href = "/order-success";
-    }, 1500);
-  };
+  const handleCashOrder = async () => {
+  setIsLoading(true);
+  
+  // Validate form first
+  const validation = validateForm();
+  if (!validation.valid) {
+    setStripeError(validation.error);
+    setIsLoading(false);
+    return;
+  }
+
+  try {
+    // Prepare order data
+    const orderData = {
+      customer: {
+        email: formData.email,
+        name: `${formData.firstName} ${formData.lastName}`,
+        phone: formData.phone,
+        address: {
+          line1: formData.address,
+          line2: formData.apartment,
+          city: formData.city,
+          postal_code: formData.zip,
+          country: formData.country,
+        }
+      },
+      billing: billingSame ? null : {
+        name: `${formData.billingFirstName} ${formData.billingLastName}`,
+        phone: formData.billingPhone || formData.phone,
+        address: {
+          line1: formData.billingAddress,
+          line2: formData.billingApartment,
+          city: formData.billingCity,
+          postal_code: formData.billingZip,
+          country: formData.billingCountry,
+        }
+      },
+      items: cart,
+      shippingMethod,
+      total
+    };
+
+    // Save order to database
+    const response = await fetch('/api/orders', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        customer: orderData.customer,
+        items: orderData.items,
+        total: orderData.total,
+        paymentMethod: 'cash'
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to create order');
+    }
+
+    // Clear cart and redirect
+    clearCart();
+    window.location.href = "/order-success";
+  } catch (err) {
+    setStripeError(err.message);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   const validateForm = () => {
     const requiredFields = ['email', 'lastName', 'address', 'city', 'phone'];
@@ -135,7 +196,26 @@ export default function CheckoutPage() {
       if (session.error) {
         throw new Error(session.error);
       }
-      
+       const orderResponse = await fetch('/api/orders', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        customer: orderData.customer,
+        items: orderData.items,
+        total: orderData.total,
+        paymentMethod: 'stripe',
+        stripeSessionId: session.id,
+        paymentStatus: 'pending'
+      }),
+    });
+
+    if (!orderResponse.ok) {
+      throw new Error('Failed to create order record');
+    }
+
+    // Redirect to Stripe
       // Redirect to Stripe checkout
       const stripe = await stripePromise;
       const { error } = await stripe.redirectToCheckout({
