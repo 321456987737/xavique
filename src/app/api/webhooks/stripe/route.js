@@ -2,10 +2,11 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import Order from '@/model/Order';
-
+import dbConnect from '@/lib/db';
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export async function POST(request) {
+   await dbConnect();
   const payload = await request.text();
   const sig = request.headers.get('stripe-signature');
 
@@ -28,7 +29,7 @@ export async function POST(request) {
 
     // Update order status in database
     try {
-      await prisma.order.update({
+      await Order.order.update({
         where: {
           stripeSessionId: session.id,
         },
