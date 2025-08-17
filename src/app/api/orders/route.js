@@ -4,9 +4,12 @@ import { NextResponse } from 'next/server';
 import { dbConnect } from '@/lib/db';
 export async function POST(request) {
   try {
+     await dbConnect()
+     console.log(1)
     const { customer, items, total, paymentMethod, stripeSessionId } = await request.json();
-   await dbConnect()
-    const order = await Order.order.create({
+     console.log(1)
+
+    const order = await Order.create({
       data: {
         customer: JSON.stringify(customer),
         items: JSON.stringify(items),
@@ -16,6 +19,7 @@ export async function POST(request) {
         paymentStatus: paymentMethod === 'cash' ? 'pending' : 'paid',
       }
     });
+     console.log(1)
 
     return NextResponse.json(order, { status: 201 });
   } catch (error) {
