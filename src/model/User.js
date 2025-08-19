@@ -8,6 +8,12 @@ const UserSchema = new mongoose.Schema({
     required: [true, "Please provide a username"],
     unique: true,
   },
+  status: {
+    type: String,
+    enum: ["active", "inactive"],
+    default: "active",
+    required: false,
+  },
   email: {
     type: String,
     required: [true, "Please provide an email"],
