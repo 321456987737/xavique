@@ -216,6 +216,7 @@ export default function CheckoutPage() {
     }
 
     // Redirect to Stripe
+
       // Redirect to Stripe checkout
       const stripe = await stripePromise;
       const { error } = await stripe.redirectToCheckout({
