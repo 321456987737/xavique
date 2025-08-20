@@ -13,6 +13,10 @@ const UserSchema = new mongoose.Schema({
     enum: ["active", "inactive"],
     default: "active",
     required: false,
+  },  role: {
+    type: String,
+    enum: ['customer', 'admin', 'superadmin'],
+    default: 'customer'
   },
   email: {
     type: String,

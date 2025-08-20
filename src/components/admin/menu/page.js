@@ -43,11 +43,6 @@ const menuItems = [
     href: "/admin/Customers",
   },
   {
-    label: "Analytics",
-    icon: BarChart3,
-    href: "/admin/AnalyticsReports",
-  },
-  {
     label: "Auth & Roles",
     icon: ShieldCheck,
     href: "/admin/AuthenticationAuthorization",

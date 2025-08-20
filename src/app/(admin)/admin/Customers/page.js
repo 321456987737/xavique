@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Edit, X, Filter, User, Mail, Calendar, DollarSign, Hash } from 'lucide-react';
+import { Search, Edit, X, Filter, User, Mail, Calendar, DollarSign, Hash, Loader2, ChevronDown } from 'lucide-react';
 import axios from 'axios';
 
 function UserSearchBar({ onUserSelect }) {
@@ -91,12 +91,43 @@ function UserSearchBar({ onUserSelect }) {
   );
 }
 
+// Intersection Observer Hook for infinite scroll
+function useIntersectionObserver(options = {}) {
+  const [isIntersecting, setIsIntersecting] = useState(false);
+  const targetRef = useRef(null);
+
+  useEffect(() => {
+    const target = targetRef.current;
+    if (!target) return;
+
+    const observer = new IntersectionObserver(([entry]) => {
+      setIsIntersecting(entry.isIntersecting);
+    }, {
+      threshold: 0.1,
+      rootMargin: '100px',
+      ...options
+    });
+
+    observer.observe(target);
+    return () => observer.unobserve(target);
+  }, [options.threshold, options.rootMargin]);
+
+  return [targetRef, isIntersecting];
+}
+
 export default function CustomersPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const USERS_PER_PAGE = 2;
 
   // edit modal state
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -104,40 +135,76 @@ export default function CustomersPage() {
   const [newStatus, setNewStatus] = useState('active');
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    fetchUsersWithOrderData();
+  // Infinite scroll
+  const [sentinelRef, isIntersecting] = useIntersectionObserver();
+
+  // Cache for order data to avoid refetching
+  const orderDataCache = useRef(new Map());
+
+  const fetchOrderDataForUser = useCallback(async (user) => {
+    const cacheKey = user.email;
+    if (orderDataCache.current.has(cacheKey)) {
+      return { ...user, orderData: orderDataCache.current.get(cacheKey) };
+    }
+
+    try {
+      const orderRes = await axios.post('/api/orderextradata', { email: user.email });
+      const orderData = orderRes.data;
+      console.log(orderData,"this si the order data")
+      orderDataCache.current.set(cacheKey, orderData);
+      return { ...user, orderData };
+    } catch (error) {
+      console.error(`Failed to fetch order data for ${user.email}`, error);
+      const defaultOrderData = { lastOrderDate: null, totalSpend: 0, ordersCount: 0 };
+      orderDataCache.current.set(cacheKey, defaultOrderData);
+      return { ...user, orderData: defaultOrderData };
+    }
   }, []);
 
-  const fetchUsersWithOrderData = async () => {
+  const fetchUsers = useCallback(async (page = 1, reset = false) => {
     try {
-      setIsLoading(true);
-      const res = await axios.get('/api/users');
-      const userList = res.data.users ?? [];
+      if (page === 1) setIsLoading(true);
+      else setIsLoadingMore(true);
 
+      const res = await axios.get('/api/users', {
+        params: {
+          page,
+          limit: USERS_PER_PAGE
+        }
+      });
+
+      const { users: newUsers, totalCount, hasMore: moreAvailable } = res.data;
+      // Fetch order data for new users in parallel
       const usersWithOrderData = await Promise.all(
-        userList.map(async (user) => {
-          try {
-            const orderRes = await axios.post('/api/orderextradata', { email: user.email });
-            return { ...user, orderData: orderRes.data };
-          } catch (error) {
-            console.error(`Failed to fetch order data for ${user.email}`, error);
-            return {
-              ...user,
-              orderData: { lastOrderDate: null, totalSpend: 0, ordersCount: 0 },
-            };
-          }
-        })
+        newUsers.map(fetchOrderDataForUser)
       );
 
-      setUsers(usersWithOrderData);
+      setUsers(prevUsers => reset ? usersWithOrderData : [...prevUsers, ...usersWithOrderData]);
+      setHasMore(moreAvailable);
+      setTotalUsers(totalCount);
+      setCurrentPage(page);
+
     } catch (err) {
       console.error('Error fetching users:', err);
     } finally {
       setIsLoading(false);
+      setIsLoadingMore(false);
     }
-  };
+  }, [fetchOrderDataForUser]);
 
-  // search and filter
+  // Initial load
+  useEffect(() => {
+    fetchUsers(1, true);
+  }, [fetchUsers]);
+
+  // Infinite scroll trigger
+  useEffect(() => {
+    if (isIntersecting && hasMore && !isLoadingMore && !isLoading) {
+      fetchUsers(currentPage + 1, false);
+    }
+  }, [isIntersecting, hasMore, isLoadingMore, isLoading, currentPage, fetchUsers]);
+
+  // Search and filter
   useEffect(() => {
     const term = searchTerm.toLowerCase();
     const filtered = users.filter(
@@ -189,15 +256,41 @@ export default function CustomersPage() {
     setStatusFilter('all');
   };
 
+  const refreshData = async () => {
+    orderDataCache.current.clear();
+    setCurrentPage(1);
+    setHasMore(true);
+    await fetchUsers(1, true);
+  };
+
+  // Calculate stats from all loaded users
+  const stats = {
+    total: totalUsers,
+    active: users.filter(u => u.status === 'active').length,
+    inactive: users.filter(u => u.status === 'inactive').length,
+    totalRevenue: users.reduce((sum, user) => sum + (user.orderData?.totalSpend || 0), 0)
+  };
+  console.log(filteredUsers)
   return (
     <div className="min-h-screen w-full bg-[#0A0A0A] text-white p-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
           <h1 className="text-2xl font-bold">Customer Management</h1>
-          <p className="text-gray-400 mt-1">Manage your customers and their orders</p>
+          <p className="text-gray-400 mt-1">
+            Manage your customers and their orders • {filteredUsers.length} of {totalUsers} customers
+            {hasMore && <span className="text-[#D4AF37]"> (Loading more...)</span>}
+          </p>
         </div>
-        <UserSearchBar onUserSelect={handleUserSelect} />
+        <div className="flex gap-3">
+          <UserSearchBar onUserSelect={handleUserSelect} />
+          <button
+            onClick={refreshData}
+            className="px-4 py-2 bg-[#D4AF37] text-black rounded-lg hover:bg-[#b9962d] transition-colors font-medium"
+          >
+            Refresh
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -243,7 +336,7 @@ export default function CustomersPage() {
               <User className="text-blue-400" size={20} />
             </div>
             <div>
-              <h3 className="text-2xl font-bold">{users.length}</h3>
+              <h3 className="text-2xl font-bold">{stats.total.toLocaleString()}</h3>
               <p className="text-gray-400 text-sm">Total Customers</p>
             </div>
           </div>
@@ -255,7 +348,7 @@ export default function CustomersPage() {
               <User className="text-green-400" size={20} />
             </div>
             <div>
-              <h3 className="text-2xl font-bold">{users.filter(u => u.status === 'active').length}</h3>
+              <h3 className="text-2xl font-bold">{stats.active.toLocaleString()}</h3>
               <p className="text-gray-400 text-sm">Active Customers</p>
             </div>
           </div>
@@ -267,7 +360,7 @@ export default function CustomersPage() {
               <User className="text-red-400" size={20} />
             </div>
             <div>
-              <h3 className="text-2xl font-bold">{users.filter(u => u.status === 'inactive').length}</h3>
+              <h3 className="text-2xl font-bold">{stats.inactive.toLocaleString()}</h3>
               <p className="text-gray-400 text-sm">Inactive Customers</p>
             </div>
           </div>
@@ -280,7 +373,7 @@ export default function CustomersPage() {
             </div>
             <div>
               <h3 className="text-2xl font-bold">
-                ${users.reduce((sum, user) => sum + (user.orderData?.totalSpend || 0), 0).toFixed(2)}
+                ${stats.totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </h3>
               <p className="text-gray-400 text-sm">Total Revenue</p>
             </div>
@@ -304,8 +397,8 @@ export default function CustomersPage() {
               </tr>
             </thead>
             <tbody>
-              {isLoading
-                ? Array.from({ length: 6 }).map((_, idx) => (
+              {isLoading && users.length === 0
+                ? Array.from({ length: 10 }).map((_, idx) => (
                     <tr key={idx} className="border-b border-gray-800">
                       {Array.from({ length: 7 }).map((_, i) => (
                         <td key={i} className="py-3 px-4">
@@ -314,9 +407,12 @@ export default function CustomersPage() {
                       ))}
                     </tr>
                   ))
-                : filteredUsers.map((customer) => (
-                    <tr
+                : filteredUsers.map((customer, index) => (
+                    <motion.tr
                       key={customer._id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: index * 0.05 }}
                       className="border-b border-gray-800 last:border-0 hover:bg-[#2A2A2A] transition-colors"
                     >
                       <td className="py-3 px-4">
@@ -332,7 +428,7 @@ export default function CustomersPage() {
                       </td>
                       <td className="py-3 px-4">
                         <span
-                          className={`px-2 py-1 rounded-full text-xs ${
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${
                             customer.status === 'active'
                               ? 'bg-green-900 text-green-300'
                               : customer.status === 'inactive'
@@ -373,19 +469,50 @@ export default function CustomersPage() {
                           <Edit size={16} />
                         </motion.button>
                       </td>
-                    </tr>
+                    </motion.tr>
                   ))}
             </tbody>
           </table>
           
-          {!isLoading && filteredUsers.length === 0 && (
+          {!isLoading && filteredUsers.length === 0 && users.length > 0 && (
             <div className="p-8 text-center text-gray-400">
               <User size={48} className="mx-auto mb-4 opacity-50" />
-              <p>No customers found</p>
+              <p>No customers found matching your criteria</p>
               <p className="text-sm mt-2">Try adjusting your search or filters</p>
             </div>
           )}
+
+          {!isLoading && users.length === 0 && (
+            <div className="p-8 text-center text-gray-400">
+              <User size={48} className="mx-auto mb-4 opacity-50" />
+              <p>No customers found</p>
+              <p className="text-sm mt-2">Get started by adding your first customer</p>
+            </div>
+          )}
         </div>
+
+        {/* Loading more indicator */}
+        {isLoadingMore && (
+          <div className="p-4 flex justify-center items-center border-t border-gray-700">
+            <Loader2 className="animate-spin text-[#D4AF37] mr-2" size={20} />
+            <span className="text-gray-400">Loading more customers...</span>
+          </div>
+        )}
+
+        {/* Infinite scroll sentinel */}
+        {hasMore && !isLoading && (
+          <div ref={sentinelRef} className="h-10 flex items-center justify-center">
+            <ChevronDown className="text-gray-500 animate-bounce" size={20} />
+          </div>
+        )}
+
+        {/* End of list indicator */}
+        {!hasMore && users.length > 0 && (
+          <div className="p-4 text-center text-gray-500 border-t border-gray-700">
+            <p>You ve reached the end of the list</p>
+            <p className="text-sm mt-1">{users.length} of {totalUsers} customers loaded</p>
+          </div>
+        )}
       </div>
 
       {/* Edit Status Modal */}
@@ -460,7 +587,14 @@ export default function CustomersPage() {
                 disabled={saving}
                 className="flex-1 rounded-lg bg-[#D4AF37] px-4 py-2 font-semibold text-black transition hover:bg-[#b9962d] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {saving ? 'Saving...' : 'Save Changes'}
+                {saving ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <Loader2 className="animate-spin" size={16} />
+                    Saving...
+                  </div>
+                ) : (
+                  'Save Changes'
+                )}
               </button>
             </div>
           </motion.div>
@@ -483,7 +617,7 @@ export default function CustomersPage() {
 //   const [showDropdown, setShowDropdown] = useState(false);
 
 //   useEffect(() => {
-//     if (!searchTerm) {
+//     if (!searchTerm.trim()) {
 //       setResults([]);
 //       setShowDropdown(false);
 //       return;
@@ -499,6 +633,7 @@ export default function CustomersPage() {
 //         setShowDropdown(true);
 //       } catch (err) {
 //         console.error('Search error:', err);
+//         setResults([]);
 //       } finally {
 //         setIsLoading(false);
 //       }
@@ -524,6 +659,7 @@ export default function CustomersPage() {
 //           value={searchTerm}
 //           onChange={(e) => setSearchTerm(e.target.value)}
 //           onFocus={() => searchTerm && setShowDropdown(true)}
+//           onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
 //         />
 //       </div>
 
@@ -643,6 +779,7 @@ export default function CustomersPage() {
 //       setCurrentUser(null);
 //     } catch (err) {
 //       console.error('Error updating status:', err);
+//       alert('Failed to update status. Please try again.');
 //     } finally {
 //       setSaving(false);
 //     }

@@ -7,17 +7,21 @@ import Order from '@/model/Order';
 export async function POST(req) {
   try {
     const { email } = await req.json();
+
     if (!email) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 });
     }
 
     await dbConnect();
 
-    const orders = await Order.find({ email })
-      .select('createdAt total totalAmount grandTotal')
+    // Fetch all orders for this customer email
+    const orders = await Order.find({ 'customer.email': email })
+      .select('createdAt total')
       .lean();
 
     const ordersCount = orders.length;
+
+    // Get last order date (latest createdAt)
     const lastOrderDate =
       ordersCount > 0
         ? orders.reduce((latest, o) => {
@@ -26,17 +30,25 @@ export async function POST(req) {
           }, new Date(0))
         : null;
 
+    // Calculate total spend
     const totalSpend = orders.reduce((sum, o) => {
-      const val = Number(o.grandTotal ?? o.totalAmount ?? o.total ?? 0);
+      const val = Number(o.total ?? 0);
       return sum + (Number.isFinite(val) ? val : 0);
     }, 0);
 
-    return NextResponse.json({ ordersCount, lastOrderDate, totalSpend }, { status: 200 });
+    return NextResponse.json(
+      { ordersCount, lastOrderDate, totalSpend },
+      { status: 200 }
+    );
   } catch (err) {
     console.error('orderextradata POST error:', err);
-    return NextResponse.json({ error: 'Failed to compute order data' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Failed to compute order data' },
+      { status: 500 }
+    );
   }
 }
+
 
 // PUT: update ONLY user's status (active/inactive)
 export async function PUT(req) {
