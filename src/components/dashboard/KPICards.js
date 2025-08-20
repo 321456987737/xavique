@@ -116,17 +116,10 @@ export default function KPICards() {
       href: "/admin/revenue",
       icon: DollarSign
     },
-    { 
-      label: "Low Stock Products", 
-      value: metrics.lowStock, 
-      change: metrics.lowStockChange, 
-      href: "/admin/products",
-      icon: AlertTriangle
-    },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid justify-center grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {cards.map((card, i) => (
         <Card key={i} {...card} />
       ))}
