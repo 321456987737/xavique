@@ -45,7 +45,7 @@ export async function POST(req) {
       line_items: lineItems,
       mode: 'payment',
       customer_email: customer.email,
-      success_url: `${process.env.NEXTAUTH_URL}/order-success?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${process.env.NEXTAUTH_URL}/order-success`,
       cancel_url: `${process.env.NEXTAUTH_URL}/checkout`,
       billing_address_collection: 'required',
       shipping_address_collection: {
