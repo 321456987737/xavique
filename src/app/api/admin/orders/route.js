@@ -15,7 +15,7 @@ export async function GET(req) {
     }
    console.log(1)
 
-    const orders = await Order.find({ email:email }).sort({ createdAt: -1 });
+    const orders = await Order.find({ "customer.email":email }).sort({ createdAt: -1 });
    console.log(1)
 console.log(orders)
     return NextResponse.json({ success: true, data: orders });
