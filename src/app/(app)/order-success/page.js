@@ -16,7 +16,7 @@ export default function OrderSuccessPage() {
       try {
         const query = new URLSearchParams(window.location.search);
         const sessionId = query.get('session_id');
-
+        console.log(sessionId,"this is teh session id ")
         if (sessionId) {
           const response = await fetch(`/api/orders?sessionId=${sessionId}`);
           const orderData = await response.json();
