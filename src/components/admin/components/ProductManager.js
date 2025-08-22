@@ -7,7 +7,20 @@ import axios from "axios";
 import ImageUpload from "./ImageUpload";
 import { toast } from "react-hot-toast";
 
-const SIZE_OPTIONS = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"];
+const SIZE_OPTIONS = [
+  // Clothing (general apparel)
+  "XS", "S", "M", "L", "XL", "XXL", "XXXL",
+
+  // Numeric clothing sizes
+  "28", "30", "32", "34", "36", "38",
+
+  // Shoe sizes (common EU/US range)
+  "US 7", "US 8", "US 9", "US 10", "US 11",
+
+  // Watch sizes (case diameters)
+  "38mm", "40mm", "42mm", "44mm", "46mm"
+];
+
 const COLOR_OPTIONS = [
   "Black", "White", "Red", "Blue", "Green", "Yellow", 
   "Purple", "Pink", "Gray", "Brown", "Navy", "Beige"
@@ -313,13 +326,28 @@ const AddProductSection = () => {
               required
             >
               <option value="">Select Subcategory</option>
-              <option value="Shoes">Shoes</option>
-              <option value="Shirts">Shirts</option>
-              <option value="Jeans">Jeans</option>
-              <option value="Bags">Bags</option>
-              <option value="Sunglasses">Sunglasses</option>
-              <option value="Caps">Caps</option>
-              <option value="Accessories">Accessories</option>
+<option value="Shoes">Shoes</option>
+<option value="Shirts">Shirts</option>
+<option value="Jeans">Jeans</option>
+<option value="Bags">Bags</option>
+<option value="Sunglasses">Sunglasses</option>
+<option value="Caps">Caps</option>
+<option value="Accessories">Accessories</option>
+<option value="T-Shirts">T-Shirts</option>
+<option value="Shorts">Shorts</option>
+<option value="Jackets">Jackets</option>
+<option value="Sweaters">Sweaters</option>
+<option value="Hoodies">Hoodies</option>
+<option value="Belts">Belts</option>
+<option value="Watches">Watches</option>
+<option value="Wallets">Wallets</option>
+<option value="Scarves">Scarves</option>
+<option value="Socks">Socks</option>
+<option value="Jewelry">Jewelry</option>
+<option value="Gloves">Gloves</option>
+<option value="Sportswear">Sportswear</option>
+<option value="Formal Wear">Formal Wear</option>
+
             </select>
           </div>
         </div>

@@ -9,21 +9,6 @@ import axios from "axios";
 
 // Categories data
 const categories = [
-  // {
-  //   label: "Gifts and Personalization",
-  //   subcategories: [
-  //     {
-  //       label: "Custom Engraving",
-  //       subsubcategories: ["Leather Goods", "Jewelry", "Watches"],
-  //     },
-  //     {
-  //       label: "Monogramming",
-  //       subsubcategories: ["Handbags", "Wallets", "Travel Bags"],
-  //     },
-  //     { label: "Gift Wrapping" },
-  //     { label: "Special Editions" },
-  //   ],
-  // },
   {
     label: "New",
     subcategories: [
@@ -40,103 +25,72 @@ const categories = [
       { label: "Editor's Choice" },
     ],
   },
-  // {
-  //   label: "Bags and Small Leather Goods",
-  //   subcategories: [
-  //     { label: "Tote Bags" },
-  //     { label: "Crossbody Bags" },
-  //     {
-  //       label: "Wallets & Cardholders",
-  //       subsubcategories: ["Bi-Fold", "Tri-Fold", "Card Holders"],
-  //     },
-  //   ],
-  // },
   {
     label: "Women",
     subcategories: [
       { label: "Dresses" },
       { label: "Shoes" },
+      { label: "Jeans" },
+      { label: "T-Shirts" },
+      { label: "Jackets" },
+      { label: "Sweaters" },
+      { label: "Hoodies" },
+      { label: "Handbags" },
       {
         label: "Jewelry",
         subsubcategories: ["Necklaces", "Bracelets", "Earrings", "Rings"],
       },
-      { label: "Handbags" },
+      { label: "Belts" },
+      { label: "Watches" },
+      { label: "Sunglasses" },
+      { label: "Scarves" },
+      { label: "Gloves" },
+      { label: "Formal Wear" },
+      { label: "Sportswear" },
+      { label: "Accessories" },
     ],
   },
   {
     label: "Men",
     subcategories: [
       { label: "Shoes" },
+      { label: "Shirts" },
+      { label: "Jeans" },
+      { label: "T-Shirts" },
+      { label: "Jackets" },
+      { label: "Sweaters" },
+      { label: "Hoodies" },
+      { label: "Belts" },
       {
         label: "Watches",
         subsubcategories: ["Luxury", "Sport", "Classic"],
       },
+      { label: "Wallets" },
+      { label: "Sunglasses" },
+      { label: "Caps" },
+      { label: "Formal Wear" },
+      { label: "Sportswear" },
+      { label: "Accessories" },
+    ],
+  },
+  {
+    label: "Kids",
+    subcategories: [
+      { label: "Shoes" },
+      { label: "T-Shirts" },
+      { label: "Shorts" },
+      { label: "Jeans" },
       { label: "Jackets" },
-      { label: "Belts" },
+      { label: "Sweaters" },
+      { label: "Hoodies" },
+      { label: "Caps" },
+      { label: "Sportswear" },
+      { label: "Accessories" },
     ],
   },
-  {
-    label: "Jewelry",
-    subcategories: [
-      {
-        label: "Necklaces",
-        subsubcategories: ["Gold", "Platinum", "Diamond"],
-      },
-      { label: "Bracelets" },
-      { label: "Rings" },
-      { label: "Earrings" },
-    ],
-  },
-  {
-    label: "Watches",
-    subcategories: [
-      { label: "Luxury Watches" },
-      { label: "Sport Watches" },
-      {
-        label: "Classic Watches",
-        subsubcategories: ["Automatic", "Quartz", "Skeleton"],
-      },
-    ],
-  },
-  {
-    label: "Perfumes",
-    subcategories: [
-      { label: "Women's Perfumes" },
-      { label: "Men's Perfumes" },
-      { label: "Unisex Fragrances" },
-      {
-        label: "Gift Sets",
-        subsubcategories: ["Mini Sets", "Exclusive Sets"],
-      },
-    ],
-  },
-  // {
-  //   label: "Trunks, Travel and Home",
-  //   subcategories: [
-  //     { label: "Travel Bags" },
-  //     { label: "Luggage" },
-  //     { label: "Decor" },
-  //   ],
-  // },
-  // {
-  //   label: "Services",
-  //   subcategories: [
-  //     { label: "Repairs" },
-  //     { label: "Care & Maintenance" },
-  //     { label: "Consultations" },
-  //     { label: "Personal Shopping" },
-  //   ],
-  // },
-  // {
-  //   label: "The Maison Louis Vuitton",
-  //   subcategories: [
-  //     { label: "Heritage" },
-  //     { label: "Art Exhibitions" },
-  //     { label: "Collaborations" },
-  //     { label: "Sustainability" },
-  //   ],
-  // },
 ];
+
+
 
 // Helper function to generate URL slugs
 const generateSlug = (text) => {

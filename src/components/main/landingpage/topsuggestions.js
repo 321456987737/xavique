@@ -9,7 +9,7 @@ const Topsuggestions = () => {
     {
       BgColor: "bg-green-400",
       category: "Men",
-      subcategory: "jewelery",
+      subcategory: "accessories",
       image: "/a_men_jewelry_with_dark_theme_bg.jpeg",
     },
     {
@@ -27,13 +27,13 @@ const Topsuggestions = () => {
     {
       BgColor: "bg-pink-400",
       category: "Women",
-      subcategory: "jewelery",
+      subcategory: "accessories",
       image: "/create_an_image_of_women_jewelery_that.jpeg",
     },
     {
       BgColor: "bg-yellow-400",
       category: "Women",
-      subcategory: "hign heels",
+      subcategory: "shoes",
       image: "/create_an_image_of_women_high_heels.jpeg",
     },
     {
