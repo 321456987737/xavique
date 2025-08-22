@@ -226,7 +226,7 @@ import React from 'react'
 
 const Page = () => {
   return (
-    <div className='w-full h-screen flex items-center justify-center text-3xl text-[#D4AF37] font-semibold'>this page is underconstruction please visit later ! </div>
+    <div className='w-full h-screen flex items-center justify-center text-3xl text-center text-[#D4AF37] font-semibold'>this page is underconstruction please visit later ! </div>
   )
 }
 
