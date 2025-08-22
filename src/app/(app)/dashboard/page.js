@@ -45,7 +45,48 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8">
       <h1 className="text-4xl font-extrabold tracking-tight">Dashboard Overview</h1>
-
+ <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.4 }}
+        className="bg-zinc-900 p-8 rounded-2xl shadow-lg text-center"
+      >
+        {loading ? (
+          <div className="flex flex-col items-center">
+            <div className="animate-pulse bg-gray-700 w-24 h-24 rounded-full mb-4"></div>
+            <div className="animate-pulse bg-gray-700 h-6 w-40 mb-2 rounded"></div>
+            <div className="animate-pulse bg-gray-700 h-4 w-32 mb-4 rounded"></div>
+            <div className="animate-pulse bg-gray-700 h-6 w-32 rounded"></div>
+          </div>
+        ) : user ? (
+          <>
+            <div className="relative w-28 h-28 rounded-full bg-gray-700 flex items-center justify-center mx-auto overflow-hidden ring-4 ring-purple-600/30">
+              {user.image ? (
+                <img 
+                  src={user.image} 
+                  alt={user.username} 
+                  className="w-full h-full object-cover rounded-full"
+                />
+              ) : (
+                <UserIcon className="text-gray-400 w-12 h-12" />
+              )}
+              <div className="absolute bottom-0 right-0 bg-yellow-500 p-1 rounded-full animate-pulse">
+                <svg width="16" height="16" fill="black"><circle cx="8" cy="8" r="8" /></svg>
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold mt-4">{user.username}</h2>
+            <p className="text-gray-400">{user.email}</p>
+            <span className="mt-3 inline-block bg-purple-600 px-4 py-1 rounded-full text-sm font-medium capitalize">
+              {user.role}
+            </span>
+            <p className="mt-4 text-sm text-gray-500">
+              Member since {new Date(user.createdAt).toLocaleDateString()}
+            </p>
+          </>
+        ) : (
+          <p className="text-gray-400">Failed to load user data.</p>
+        )}
+      </motion.div>
       {/* Stats Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {[
@@ -88,50 +129,7 @@ export default function DashboardPage() {
           </motion.div>
         ))}
       </div>
-
-      {/* Profile Section */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.4 }}
-        className="bg-zinc-900 p-8 rounded-2xl shadow-lg text-center"
-      >
-        {loading ? (
-          <div className="flex flex-col items-center">
-            <div className="animate-pulse bg-gray-700 w-24 h-24 rounded-full mb-4"></div>
-            <div className="animate-pulse bg-gray-700 h-6 w-40 mb-2 rounded"></div>
-            <div className="animate-pulse bg-gray-700 h-4 w-32 mb-4 rounded"></div>
-            <div className="animate-pulse bg-gray-700 h-6 w-32 rounded"></div>
-          </div>
-        ) : user ? (
-          <>
-            <div className="relative w-28 h-28 rounded-full bg-gray-700 flex items-center justify-center mx-auto overflow-hidden ring-4 ring-purple-600/30">
-              {user.image ? (
-                <img 
-                  src={user.image} 
-                  alt={user.username} 
-                  className="w-full h-full object-cover rounded-full"
-                />
-              ) : (
-                <UserIcon className="text-gray-400 w-12 h-12" />
-              )}
-              <div className="absolute bottom-0 right-0 bg-yellow-500 p-1 rounded-full animate-pulse">
-                <svg width="16" height="16" fill="black"><circle cx="8" cy="8" r="8" /></svg>
-              </div>
-            </div>
-            <h2 className="text-2xl font-bold mt-4">{user.username}</h2>
-            <p className="text-gray-400">{user.email}</p>
-            <span className="mt-3 inline-block bg-purple-600 px-4 py-1 rounded-full text-sm font-medium capitalize">
-              {user.role}
-            </span>
-            <p className="mt-4 text-sm text-gray-500">
-              Member since {new Date(user.createdAt).toLocaleDateString()}
-            </p>
-          </>
-        ) : (
-          <p className="text-gray-400">Failed to load user data.</p>
-        )}
-      </motion.div>
+     
     </div>
   );
 }
