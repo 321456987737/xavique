@@ -57,3 +57,28 @@
 .group:hover .group-hover\:underline {
   text-decoration: underline;
 }
+/* Custom Scrollbar for Search Results */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;  /* thin scrollbar */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(10, 10, 10, 0.6); /* matches dark theme */
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #D4AF37, #F4D03F); /* gold gradient */
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.2); /* subtle edge highlight */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #F4D03F, #D4AF37); /* reverse on hover for nice effect */
+}
+
+/* Firefox support */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #D4AF37 rgba(10, 10, 10, 0.6);
+}
