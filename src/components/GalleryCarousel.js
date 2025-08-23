@@ -32,9 +32,6 @@ export default function GalleryCarousel({ images, title, category, price, origin
             <motion.div
               key={idx}
               className="flex-[0_0_100%] min-w-0"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4, delay: idx * 0.1 }}
             >
               <img
                 src={`${img.url}?tr=h-600,w-600,c-fill,f-auto,q-auto`}
@@ -75,9 +72,6 @@ export default function GalleryCarousel({ images, title, category, price, origin
 
       {/* Info Overlay */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.2 }}
         className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/70 to-transparent px-4 py-3 text-white flex items-end justify-between"
       >
         <div>

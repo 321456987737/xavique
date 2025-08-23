@@ -29,6 +29,7 @@ const categories = [
     label: "Women",
     subcategories: [
       { label: "Dresses" },
+      { label: "Bags" },
       { label: "Shoes" },
       { label: "Jeans" },
       { label: "T-Shirts" },
@@ -241,15 +242,15 @@ export default function FullScreenCategoryMenu({ onClose }) {
     //  mode="wait"
      >
       {/* Backdrop with subtle gradient */}
-      <motion.div
-        className="fixed inset-0 z-[99] bg-gradient-to-br from-black/50 to-[#0a0a0a]/30 backdrop-blur-md"
+      {/* <motion.div
+        className="fixed inset-0 z-[99] w-full h-full bg-gradient-to-br from-black/50 to-[#0a0a0a]/30 backdrop-blur-md"
         key="backdrop"
         initial={{ opacity: 0 }}
         animate={{ opacity: 0.5 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
         onClick={onClose}
-      />
+      /> */}
 
       {/* Desktop Menu */}
       {!isMobile && (
@@ -547,7 +548,7 @@ export default function FullScreenCategoryMenu({ onClose }) {
       {isMobile && (
         <motion.div
           key="mobile"
-          className="fixed inset-0 z-[99]"
+          className="fixed inset-0 z-[99] "
           initial={{ x: "-100%" }}
           animate={{ x: 0 }}
           exit={{ x: "100%" }}
@@ -558,9 +559,9 @@ export default function FullScreenCategoryMenu({ onClose }) {
             mass: 0.8
           }}
         >
-          <div className="h-full w-full bg-[#0A0A0A] text-white flex flex-col">
+            <div className="h-full w-full bg-[#0A0A0A] text-white flex flex-col">
             {/* Mobile Header */}
-            <div className="p-4 border-b border-[#ffffff08] flex items-center justify-between">
+            <div className="p-4 border-b border-[#ffffff08]  flex items-center justify-between">
               {selectedCategory || selectedSub ? (
                 <button
                   onClick={handleBack}

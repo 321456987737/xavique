@@ -2,7 +2,7 @@ import { dbConnect } from "@/lib/db";
 import Product from "@/model/Product";
 import { NextResponse } from "next/server";
 
-const PAGE_SIZE = 2;
+const PAGE_SIZE = 10;
 
 export async function GET(request) {
   try {

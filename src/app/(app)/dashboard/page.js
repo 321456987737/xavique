@@ -21,10 +21,18 @@ export default function DashboardPage() {
         });
         if (ordersRes.data.success) {
           const ordersData = ordersRes.data.orders;
-          const totalSpent = ordersData.reduce(
-            (sum, order) => sum + (order.discountPrice || 0),
-            0
-          );
+          console.log(ordersData,"this si the order data")
+         const totalSpent = ordersData
+  .filter(order => order.status === "completed")
+  .reduce((sum, order) => {
+    const orderTotal = order.items.reduce((itemSum, item) => {
+      return itemSum + (item.discountPrice || 0) * (item.qty || 1);
+    }, 0);
+    return sum + orderTotal;
+  }, 0);
+
+
+
           setStats({ orders: ordersData.length, totalSpent });
         }
 
