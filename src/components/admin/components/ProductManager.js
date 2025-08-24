@@ -324,28 +324,19 @@ const AddProductSection = () => {
               className="w-full bg-[#2E2E2E] border border-[#D4AF37]/50 rounded-lg px-4 py-2 text-[#F6F5F3] focus:outline-none focus:ring-1 focus:ring-[#D4AF37]"
               required
             >
-              <option value="">Select Subcategory</option>
+           <option value="">Select Subcategory</option>
 <option value="Shoes">Shoes</option>
 <option value="Shirts">Shirts</option>
 <option value="Jeans">Jeans</option>
 <option value="Bags">Bags</option>
-<option value="Sunglasses">Sunglasses</option>
 <option value="Caps">Caps</option>
 <option value="Accessories">Accessories</option>
 <option value="T-Shirts">T-Shirts</option>
-<option value="Shorts">Shorts</option>
 <option value="Jackets">Jackets</option>
-<option value="Sweaters">Sweaters</option>
-<option value="Hoodies">Hoodies</option>
-<option value="Belts">Belts</option>
 <option value="Watches">Watches</option>
 <option value="Wallets">Wallets</option>
-<option value="Scarves">Scarves</option>
-<option value="Socks">Socks</option>
 <option value="Jewelry">Jewelry</option>
-<option value="Gloves">Gloves</option>
-<option value="Sportswear">Sportswear</option>
-<option value="Formal Wear">Formal Wear</option>
+
 
             </select>
           </div>
