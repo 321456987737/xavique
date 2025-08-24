@@ -60,8 +60,6 @@ const productSchema = new mongoose.Schema(
   'Summer Collection',
   'Winter Collection',
   "Editor's Choice",
-
-  // Women
   'Dresses',
   'Bags',
   'Shoes',
@@ -84,8 +82,6 @@ const productSchema = new mongoose.Schema(
   'Formal Wear',
   'Sportswear',
   'Accessories',
-
-  // Men
   'Shoes',
   'Shirts',
   'Jeans',
@@ -104,8 +100,6 @@ const productSchema = new mongoose.Schema(
   'Formal Wear',
   'Sportswear',
   'Accessories',
-
-  // Kids
   'Shoes',
   'T-Shirts',
   'Shorts',
