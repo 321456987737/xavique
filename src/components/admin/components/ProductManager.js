@@ -1,7 +1,16 @@
 // components/AddProductSection.jsx
 "use client";
 import { motion } from "framer-motion";
-import { Plus, Minus, Image, Tag, Palette, Ruler, X, Upload } from "lucide-react";
+import {
+  Plus,
+  Minus,
+  Image,
+  Tag,
+  Palette,
+  Ruler,
+  X,
+  Upload,
+} from "lucide-react";
 import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import ImageUpload from "./ImageUpload";
@@ -9,21 +18,50 @@ import { toast } from "react-hot-toast";
 
 const SIZE_OPTIONS = [
   // Clothing (general apparel)
-  "XS", "S", "M", "L", "XL", "XXL", "XXXL",
+  "XS",
+  "S",
+  "M",
+  "L",
+  "XL",
+  "XXL",
+  "XXXL",
 
   // Numeric clothing sizes
-  "28", "30", "32", "34", "36", "38",
+  "28",
+  "30",
+  "32",
+  "34",
+  "36",
+  "38",
 
   // Shoe sizes (common EU/US range)
-  "US 7", "US 8", "US 9", "US 10", "US 11",
+  "US 7",
+  "US 8",
+  "US 9",
+  "US 10",
+  "US 11",
 
   // Watch sizes (case diameters)
-  "38mm", "40mm", "42mm", "44mm", "46mm"
+  "38mm",
+  "40mm",
+  "42mm",
+  "44mm",
+  "46mm",
 ];
 
 const COLOR_OPTIONS = [
-  "Black", "White", "Red", "Blue", "Green", "Yellow", 
-  "Purple", "Pink", "Gray", "Brown", "Navy", "Beige"
+  "Black",
+  "White",
+  "Red",
+  "Blue",
+  "Green",
+  "Yellow",
+  "Purple",
+  "Pink",
+  "Gray",
+  "Brown",
+  "Navy",
+  "Beige",
 ];
 
 const AddProductSection = () => {
@@ -42,7 +80,7 @@ const AddProductSection = () => {
     tags: [],
     slug: "",
     isFeatured: false,
-    isArchived: false
+    isArchived: false,
   });
 
   // Store images as File objects locally
@@ -64,65 +102,65 @@ const AddProductSection = () => {
       tags: [],
       slug: "",
       isFeatured: false,
-      isArchived: false
+      isArchived: false,
     });
     setImageFiles([]);
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setProductData(prev => ({ ...prev, [name]: value }));
+    setProductData((prev) => ({ ...prev, [name]: value }));
   };
 
   // Handle size toggle
   const toggleSize = (size) => {
-    setProductData(prev => ({
+    setProductData((prev) => ({
       ...prev,
-      sizes: prev.sizes.includes(size) 
-        ? prev.sizes.filter(s => s !== size)
-        : [...prev.sizes, size]
+      sizes: prev.sizes.includes(size)
+        ? prev.sizes.filter((s) => s !== size)
+        : [...prev.sizes, size],
     }));
   };
 
   // Handle color toggle
   const toggleColor = (color) => {
-    setProductData(prev => ({
+    setProductData((prev) => ({
       ...prev,
-      colors: prev.colors.includes(color) 
-        ? prev.colors.filter(c => c !== color)
-        : [...prev.colors, color]
+      colors: prev.colors.includes(color)
+        ? prev.colors.filter((c) => c !== color)
+        : [...prev.colors, color],
     }));
   };
 
   // Handle tag addition
   const addTag = (tag) => {
     if (tag.trim() && !productData.tags.includes(tag.trim())) {
-      setProductData(prev => ({
+      setProductData((prev) => ({
         ...prev,
-        tags: [...prev.tags, tag.trim()]
+        tags: [...prev.tags, tag.trim()],
       }));
     }
   };
 
   // Handle tag removal
   const removeTag = (index) => {
-    setProductData(prev => ({
+    setProductData((prev) => ({
       ...prev,
-      tags: prev.tags.filter((_, i) => i !== index)
+      tags: prev.tags.filter((_, i) => i !== index),
     }));
   };
 
   // Upload images when product is submitted
   const uploadImages = async (files) => {
     const formData = new FormData();
-    files.forEach(file => formData.append('images', file));
-    
+    files.forEach((file) => formData.append("images", file));
+
     try {
-      const response = await axios.post('/api/upload', formData);
+      const response = await axios.post("/api/upload", formData);
       return response.data.images; // array of {url, fileId}
     } catch (error) {
-      console.error('Image upload failed:', error);
-      toast.error('Failed to upload images');
+      console.error("Image upload failed:", error);
+      toast.error("Failed to upload images");
       return [];
     }
   };
@@ -130,7 +168,7 @@ const AddProductSection = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     try {
       // 1. Upload images first
       let uploadedImages = [];
@@ -141,11 +179,11 @@ const AddProductSection = () => {
       // 2. Create product with image URLs
       const productPayload = {
         ...productData,
-        images: uploadedImages
+        images: uploadedImages,
       };
 
-      const response = await axios.post('/api/product', productPayload);
-      
+      const response = await axios.post("/api/product", productPayload);
+
       if (response.data.success) {
         toast.success("Product added successfully!");
         resetForm();
@@ -159,14 +197,14 @@ const AddProductSection = () => {
   };
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       className="w-full bg-[#0A0A0A] p-8 rounded-xl border border-[#D4AF37] shadow-lg"
     >
       <div className="flex items-center justify-between mb-8">
-        <motion.h2 
+        <motion.h2
           initial={{ x: -20 }}
           animate={{ x: 0 }}
           className="text-2xl font-bold text-[#D4AF37] flex items-center gap-2"
@@ -176,16 +214,21 @@ const AddProductSection = () => {
         </motion.h2>
       </div>
 
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <form
+        onSubmit={handleSubmit}
+        className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+      >
         {/* Basic Information */}
         <div className="space-y-6 lg:col-span-2">
           <h3 className="text-lg font-semibold text-[#F6F5F3] border-b border-[#D4AF37] pb-2">
             Basic Information
           </h3>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-[#F6F5F3] mb-1">Product Title*</label>
+              <label className="block text-sm font-medium text-[#F6F5F3] mb-1">
+                Product Title*
+              </label>
               <input
                 name="title"
                 value={productData.title}
@@ -195,9 +238,11 @@ const AddProductSection = () => {
                 required
               />
             </div>
-            
+
             <div>
-              <label className="block text-sm font-medium text-[#F6F5F3] mb-1">Slug*</label>
+              <label className="block text-sm font-medium text-[#F6F5F3] mb-1">
+                Slug*
+              </label>
               <input
                 name="slug"
                 value={productData.slug}
@@ -208,9 +253,11 @@ const AddProductSection = () => {
               />
             </div>
           </div>
-          
+
           <div>
-            <label className="block text-sm font-medium text-[#F6F5F3] mb-1">Description*</label>
+            <label className="block text-sm font-medium text-[#F6F5F3] mb-1">
+              Description*
+            </label>
             <textarea
               name="description"
               value={productData.description}
@@ -227,11 +274,15 @@ const AddProductSection = () => {
           <h3 className="text-lg font-semibold text-[#F6F5F3] border-b border-[#D4AF37] pb-2">
             Pricing & Inventory
           </h3>
-          
+
           <div>
-            <label className="block text-sm font-medium text-[#F6F5F3] mb-1">Price*</label>
+            <label className="block text-sm font-medium text-[#F6F5F3] mb-1">
+              Price*
+            </label>
             <div className="relative">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-[#D4AF37]">$</span>
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-[#D4AF37]">
+                $
+              </span>
               <input
                 name="price"
                 type="number"
@@ -245,11 +296,15 @@ const AddProductSection = () => {
               />
             </div>
           </div>
-          
+
           <div>
-            <label className="block text-sm font-medium text-[#F6F5F3] mb-1">Discount Price</label>
+            <label className="block text-sm font-medium text-[#F6F5F3] mb-1">
+              Discount Price
+            </label>
             <div className="relative">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-[#D4AF37]">$</span>
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-[#D4AF37]">
+                $
+              </span>
               <input
                 name="discountPrice"
                 type="number"
@@ -262,10 +317,12 @@ const AddProductSection = () => {
               />
             </div>
           </div>
-          
+
           <div className="flex items-center justify-between">
             <div>
-              <label className="block text-sm font-medium text-[#F6F5F3] mb-1">Stock Quantity*</label>
+              <label className="block text-sm font-medium text-[#F6F5F3] mb-1">
+                Stock Quantity*
+              </label>
               <input
                 name="stockQuantity"
                 type="number"
@@ -277,17 +334,25 @@ const AddProductSection = () => {
                 required
               />
             </div>
-            
+
             <div className="flex items-center gap-2 mt-6">
               <input
                 type="checkbox"
                 id="inStock"
                 name="inStock"
                 checked={productData.inStock}
-                onChange={(e) => setProductData(prev => ({...prev, inStock: e.target.checked}))}
+                onChange={(e) =>
+                  setProductData((prev) => ({
+                    ...prev,
+                    inStock: e.target.checked,
+                  }))
+                }
                 className="h-5 w-5 rounded border-[#D4AF37] bg-[#2E2E2E] text-[#D4AF37] focus:ring-[#D4AF37]"
               />
-              <label htmlFor="inStock" className="text-sm font-medium text-[#F6F5F3]">
+              <label
+                htmlFor="inStock"
+                className="text-sm font-medium text-[#F6F5F3]"
+              >
                 In Stock
               </label>
             </div>
@@ -299,9 +364,11 @@ const AddProductSection = () => {
           <h3 className="text-lg font-semibold text-[#F6F5F3] border-b border-[#D4AF37] pb-2">
             Categories
           </h3>
-          
+
           <div>
-            <label className="block text-sm font-medium text-[#F6F5F3] mb-1">Main Category*</label>
+            <label className="block text-sm font-medium text-[#F6F5F3] mb-1">
+              Main Category*
+            </label>
             <select
               name="category"
               value={productData.category}
@@ -314,9 +381,11 @@ const AddProductSection = () => {
               <option value="Women">Women</option>
             </select>
           </div>
-          
+
           <div>
-            <label className="block text-sm font-medium text-[#F6F5F3] mb-1">Subcategory*</label>
+            <label className="block text-sm font-medium text-[#F6F5F3] mb-1">
+              Subcategory*
+            </label>
             <select
               name="subcategory"
               value={productData.subcategory}
@@ -324,20 +393,18 @@ const AddProductSection = () => {
               className="w-full bg-[#2E2E2E] border border-[#D4AF37]/50 rounded-lg px-4 py-2 text-[#F6F5F3] focus:outline-none focus:ring-1 focus:ring-[#D4AF37]"
               required
             >
-           <option value="">Select Subcategory</option>
-<option value="Shoes">Shoes</option>
-<option value="Shirts">Shirts</option>
-<option value="Jeans">Jeans</option>
-<option value="Bags">Bags</option>
-<option value="Caps">Caps</option>
-<option value="Accessories">Accessories</option>
-<option value="T-Shirts">T-Shirts</option>
-<option value="Jackets">Jackets</option>
-<option value="Watches">Watches</option>
-<option value="Wallets">Wallets</option>
-<option value="Jewelry">Jewelry</option>
-
-
+              <option value="">Select Subcategory</option>
+              <option value="Shoes">Shoes</option>
+              <option value="Shirts">Shirts</option>
+              <option value="Jeans">Jeans</option>
+              <option value="Bags">Bags</option>
+              <option value="Caps">Caps</option>
+              <option value="Accessories">Accessories</option>
+              <option value="T-Shirts">T-Shirts</option>
+              <option value="Jackets">Jackets</option>
+              <option value="Watches">Watches</option>
+              <option value="Wallets">Wallets</option>
+              <option value="Jewelry">Jewelry</option>
             </select>
           </div>
         </div>
@@ -348,19 +415,16 @@ const AddProductSection = () => {
             <Image className="w-5 h-5" />
             Product Images
           </h3>
-          
-          <ImageUpload
-            images={imageFiles}
-            onChange={setImageFiles}
-          />
-        </div>  
+
+          <ImageUpload images={imageFiles} onChange={setImageFiles} />
+        </div>
 
         {/* Variants */}
         <div className="space-y-6 lg:col-span-2">
           <h3 className="text-lg font-semibold text-[#F6F5F3] border-b border-[#D4AF37] pb-2">
             Product Variants
           </h3>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Sizes */}
             <div className="space-y-4">
@@ -368,9 +432,9 @@ const AddProductSection = () => {
                 <Ruler className="w-4 h-4" />
                 Available Sizes
               </h4>
-              
+
               <div className="flex flex-wrap gap-2">
-                {SIZE_OPTIONS.map(size => (
+                {SIZE_OPTIONS.map((size) => (
                   <motion.button
                     key={size}
                     type="button"
@@ -379,31 +443,31 @@ const AddProductSection = () => {
                     whileTap={{ scale: 0.95 }}
                     className={`px-4 py-2 rounded-lg border transition-colors ${
                       productData.sizes.includes(size)
-                        ? 'bg-[#D4AF37] text-[#0A0A0A] border-[#D4AF37]'
-                        : 'bg-[#2E2E2E] text-[#F6F5F3] border-[#D4AF37]/50 hover:border-[#D4AF37]'
+                        ? "bg-[#D4AF37] text-[#0A0A0A] border-[#D4AF37]"
+                        : "bg-[#2E2E2E] text-[#F6F5F3] border-[#D4AF37]/50 hover:border-[#D4AF37]"
                     }`}
                   >
                     {size}
                   </motion.button>
                 ))}
               </div>
-              
+
               {productData.sizes.length > 0 && (
                 <div className="text-xs text-[#F6F5F3]/70">
-                  Selected: {productData.sizes.join(', ')}
+                  Selected: {productData.sizes.join(", ")}
                 </div>
               )}
             </div>
-            
+
             {/* Colors */}
             <div className="space-y-4">
               <h4 className="text-sm font-medium text-[#F6F5F3] flex items-center gap-2">
                 <Palette className="w-4 h-4" />
                 Available Colors
               </h4>
-              
+
               <div className="flex flex-wrap gap-2">
-                {COLOR_OPTIONS.map(color => (
+                {COLOR_OPTIONS.map((color) => (
                   <motion.button
                     key={color}
                     type="button"
@@ -412,18 +476,18 @@ const AddProductSection = () => {
                     whileTap={{ scale: 0.95 }}
                     className={`px-3 py-2 rounded-lg border text-sm transition-colors ${
                       productData.colors.includes(color)
-                        ? 'bg-[#D4AF37] text-[#0A0A0A] border-[#D4AF37]'
-                        : 'bg-[#2E2E2E] text-[#F6F5F3] border-[#D4AF37]/50 hover:border-[#D4AF37]'
+                        ? "bg-[#D4AF37] text-[#0A0A0A] border-[#D4AF37]"
+                        : "bg-[#2E2E2E] text-[#F6F5F3] border-[#D4AF37]/50 hover:border-[#D4AF37]"
                     }`}
                   >
                     {color}
                   </motion.button>
                 ))}
               </div>
-              
+
               {productData.colors.length > 0 && (
                 <div className="text-xs text-[#F6F5F3]/70">
-                  Selected: {productData.colors.join(', ')}
+                  Selected: {productData.colors.join(", ")}
                 </div>
               )}
             </div>
@@ -436,17 +500,17 @@ const AddProductSection = () => {
             <Tag className="w-5 h-5" />
             Product Tags
           </h3>
-          
+
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <input
                 type="text"
                 id="tagInput"
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' && e.target.value.trim()) {
+                  if (e.key === "Enter" && e.target.value.trim()) {
                     e.preventDefault();
                     addTag(e.target.value);
-                    e.target.value = '';
+                    e.target.value = "";
                   }
                 }}
                 className="flex-1 bg-[#2E2E2E] border w-[100px] border-[#D4AF37]/50 rounded-lg px-4 py-2 text-[#F6F5F3] focus:outline-none focus:ring-1 focus:ring-[#D4AF37]"
@@ -455,10 +519,10 @@ const AddProductSection = () => {
               <motion.button
                 type="button"
                 onClick={() => {
-                  const input = document.getElementById('tagInput');
+                  const input = document.getElementById("tagInput");
                   if (input && input.value.trim()) {
                     addTag(input.value);
-                    input.value = '';
+                    input.value = "";
                   }
                 }}
                 whileHover={{ scale: 1.05 }}
@@ -469,7 +533,7 @@ const AddProductSection = () => {
                 Add
               </motion.button>
             </div>
-            
+
             {productData.tags.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {productData.tags.map((tag, index) => (
@@ -502,7 +566,7 @@ const AddProductSection = () => {
           <h3 className="text-lg font-semibold text-[#F6F5F3] border-b border-[#D4AF37] pb-2">
             Product Status
           </h3>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="flex items-center gap-3">
               <input
@@ -510,24 +574,40 @@ const AddProductSection = () => {
                 id="isFeatured"
                 name="isFeatured"
                 checked={productData.isFeatured}
-                onChange={(e) => setProductData(prev => ({...prev, isFeatured: e.target.checked}))}
+                onChange={(e) =>
+                  setProductData((prev) => ({
+                    ...prev,
+                    isFeatured: e.target.checked,
+                  }))
+                }
                 className="h-5 w-5 rounded border-[#D4AF37] bg-[#2E2E2E] text-[#D4AF37] focus:ring-[#D4AF37]"
               />
-              <label htmlFor="isFeatured" className="text-sm font-medium text-[#F6F5F3]">
+              <label
+                htmlFor="isFeatured"
+                className="text-sm font-medium text-[#F6F5F3]"
+              >
                 Featured Product
               </label>
             </div>
-            
+
             <div className="flex items-center gap-3">
               <input
                 type="checkbox"
                 id="isArchived"
                 name="isArchived"
                 checked={productData.isArchived}
-                onChange={(e) => setProductData(prev => ({...prev, isArchived: e.target.checked}))}
+                onChange={(e) =>
+                  setProductData((prev) => ({
+                    ...prev,
+                    isArchived: e.target.checked,
+                  }))
+                }
                 className="h-5 w-5 rounded border-[#D4AF37] bg-[#2E2E2E] text-[#D4AF37] focus:ring-[#D4AF37]"
               />
-              <label htmlFor="isArchived" className="text-sm font-medium text-[#F6F5F3]">
+              <label
+                htmlFor="isArchived"
+                className="text-sm font-medium text-[#F6F5F3]"
+              >
                 Archived (Hide from store)
               </label>
             </div>
@@ -535,7 +615,7 @@ const AddProductSection = () => {
         </div>
 
         {/* Submit Button */}
-        <motion.div 
+        <motion.div
           className="lg:col-span-2 pt-6"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -579,7 +659,7 @@ export default AddProductSection;
 
 // const SIZE_OPTIONS = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"];
 // const COLOR_OPTIONS = [
-//   "Black", "White", "Red", "Blue", "Green", "Yellow", 
+//   "Black", "White", "Red", "Blue", "Green", "Yellow",
 //   "Purple", "Pink", "Gray", "Brown", "Navy", "Beige"
 // ];
 
@@ -640,7 +720,7 @@ export default AddProductSection;
 
 //   const handleSubmit = async (e) => {
 //     e.preventDefault();
-    
+
 //     try {
 //       const response = await axios.post('/api/product', productData);
 //       console.log("Product added successfully:", response.data);
@@ -659,7 +739,7 @@ export default AddProductSection;
 //   const toggleSize = (size) => {
 //     setProductData(prev => ({
 //       ...prev,
-//       sizes: prev.sizes.includes(size) 
+//       sizes: prev.sizes.includes(size)
 //         ? prev.sizes.filter(s => s !== size)
 //         : [...prev.sizes, size]
 //     }));
@@ -669,7 +749,7 @@ export default AddProductSection;
 //   const toggleColor = (color) => {
 //     setProductData(prev => ({
 //       ...prev,
-//       colors: prev.colors.includes(color) 
+//       colors: prev.colors.includes(color)
 //         ? prev.colors.filter(c => c !== color)
 //         : [...prev.colors, color]
 //     }));
@@ -694,14 +774,14 @@ export default AddProductSection;
 //   };
 
 //   return (
-//     <motion.div 
+//     <motion.div
 //       initial={{ opacity: 0, y: 20 }}
 //       animate={{ opacity: 1, y: 0 }}
 //       transition={{ duration: 0.5 }}
 //       className="w-full bg-[#0A0A0A] p-8 rounded-xl border border-[#D4AF37] shadow-lg"
 //     >
 //       <div className="flex items-center justify-between mb-8">
-//         <motion.h2 
+//         <motion.h2
 //           initial={{ x: -20 }}
 //           animate={{ x: 0 }}
 //           className="text-2xl font-bold text-[#D4AF37] flex items-center gap-2"
@@ -717,7 +797,7 @@ export default AddProductSection;
 //           <h3 className="text-lg font-semibold text-[#F6F5F3] border-b border-[#D4AF37] pb-2">
 //             Basic Information
 //           </h3>
-          
+
 //           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 //             <div>
 //               <label className="block text-sm font-medium text-[#F6F5F3] mb-1">Product Title*</label>
@@ -730,7 +810,7 @@ export default AddProductSection;
 //                 required
 //               />
 //             </div>
-            
+
 //             <div>
 //               <label className="block text-sm font-medium text-[#F6F5F3] mb-1">Slug*</label>
 //               <input
@@ -743,7 +823,7 @@ export default AddProductSection;
 //               />
 //             </div>
 //           </div>
-          
+
 //           <div>
 //             <label className="block text-sm font-medium text-[#F6F5F3] mb-1">Description*</label>
 //             <textarea
@@ -762,7 +842,7 @@ export default AddProductSection;
 //           <h3 className="text-lg font-semibold text-[#F6F5F3] border-b border-[#D4AF37] pb-2">
 //             Pricing & Inventory
 //           </h3>
-          
+
 //           <div>
 //             <label className="block text-sm font-medium text-[#F6F5F3] mb-1">Price*</label>
 //             <div className="relative">
@@ -780,7 +860,7 @@ export default AddProductSection;
 //               />
 //             </div>
 //           </div>
-          
+
 //           <div>
 //             <label className="block text-sm font-medium text-[#F6F5F3] mb-1">Discount Price</label>
 //             <div className="relative">
@@ -797,7 +877,7 @@ export default AddProductSection;
 //               />
 //             </div>
 //           </div>
-          
+
 //           <div className="flex items-center justify-between">
 //             <div>
 //               <label className="block text-sm font-medium text-[#F6F5F3] mb-1">Stock Quantity*</label>
@@ -812,7 +892,7 @@ export default AddProductSection;
 //                 required
 //               />
 //             </div>
-            
+
 //             <div className="flex items-center gap-2 mt-6">
 //               <input
 //                 type="checkbox"
@@ -834,7 +914,7 @@ export default AddProductSection;
 //           <h3 className="text-lg font-semibold text-[#F6F5F3] border-b border-[#D4AF37] pb-2">
 //             Categories
 //           </h3>
-          
+
 //           <div>
 //             <label className="block text-sm font-medium text-[#F6F5F3] mb-1">Main Category*</label>
 //             <select
@@ -850,7 +930,7 @@ export default AddProductSection;
 //               <option value="Kids">Kids</option>
 //             </select>
 //           </div>
-          
+
 //           <div>
 //             <label className="block text-sm font-medium text-[#F6F5F3] mb-1">Subcategory*</label>
 //             <select
@@ -878,23 +958,23 @@ export default AddProductSection;
 //             <Image className="w-5 h-5" />
 //             Product Images
 //           </h3>
-          
+
 //           <ImageUpload
 //             images={productData.images || []}
-            
+
 //             onChange={(newImages) => setProductData(prev => ({
 //               ...prev,
 //               images: newImages
 //             }))}
 //           />
-//         </div>  
+//         </div>
 
 //         {/* Variants */}
 //         <div className="space-y-6 lg:col-span-2">
 //           <h3 className="text-lg font-semibold text-[#F6F5F3] border-b border-[#D4AF37] pb-2">
 //             Product Variants
 //           </h3>
-          
+
 //           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 //             {/* Sizes */}
 //             <div className="space-y-4">
@@ -902,7 +982,7 @@ export default AddProductSection;
 //                 <Ruler className="w-4 h-4" />
 //                 Available Sizes
 //               </h4>
-              
+
 //               <div className="flex flex-wrap gap-2">
 //                 {SIZE_OPTIONS.map(size => (
 //                   <motion.button
@@ -921,21 +1001,21 @@ export default AddProductSection;
 //                   </motion.button>
 //                 ))}
 //               </div>
-              
+
 //               {productData.sizes.length > 0 && (
 //                 <div className="text-xs text-[#F6F5F3]/70">
 //                   Selected: {productData.sizes.join(', ')}
 //                 </div>
 //               )}
 //             </div>
-            
+
 //             {/* Colors */}
 //             <div className="space-y-4">
 //               <h4 className="text-sm font-medium text-[#F6F5F3] flex items-center gap-2">
 //                 <Palette className="w-4 h-4" />
 //                 Available Colors
 //               </h4>
-              
+
 //               <div className="flex flex-wrap gap-2">
 //                 {COLOR_OPTIONS.map(color => (
 //                   <motion.button
@@ -954,7 +1034,7 @@ export default AddProductSection;
 //                   </motion.button>
 //                 ))}
 //               </div>
-              
+
 //               {productData.colors.length > 0 && (
 //                 <div className="text-xs text-[#F6F5F3]/70">
 //                   Selected: {productData.colors.join(', ')}
@@ -970,7 +1050,7 @@ export default AddProductSection;
 //             <Tag className="w-5 h-5" />
 //             Product Tags
 //           </h3>
-          
+
 //           <div className="space-y-4">
 //             <div className="flex items-center gap-2">
 //               <input
@@ -1003,7 +1083,7 @@ export default AddProductSection;
 //                 Add
 //               </motion.button>
 //             </div>
-            
+
 //             {productData.tags.length > 0 && (
 //               <div className="flex flex-wrap gap-2">
 //                 {productData.tags.map((tag, index) => (
@@ -1036,7 +1116,7 @@ export default AddProductSection;
 //           <h3 className="text-lg font-semibold text-[#F6F5F3] border-b border-[#D4AF37] pb-2">
 //             Product Status
 //           </h3>
-          
+
 //           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 //             <div className="flex items-center gap-3">
 //               <input
@@ -1051,7 +1131,7 @@ export default AddProductSection;
 //                 Featured Product
 //               </label>
 //             </div>
-            
+
 //             <div className="flex items-center gap-3">
 //               <input
 //                 type="checkbox"
@@ -1069,7 +1149,7 @@ export default AddProductSection;
 //         </div>
 
 //         {/* Submit Button */}
-//         <motion.div 
+//         <motion.div
 //           className="lg:col-span-2 pt-6"
 //           initial={{ opacity: 0, y: 20 }}
 //           animate={{ opacity: 1, y: 0 }}

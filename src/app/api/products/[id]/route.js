@@ -36,24 +36,33 @@ export async function PUT(request, { params }) {
 export async function DELETE(req, { params }) {
   try {
     await dbConnect();
+    console.log(1)
     const {id} = await params;
+    console.log(1)
+
     const productId = id
     const product = await Product.findById(productId);
+    console.log(1)
+
     if (!product) {
       return NextResponse.json({ error: 'Product not found', success: false }, { status: 404 });
     }
+    console.log(1)
 
     // Delete images from ImageKit
     if (product.images?.length) {
       for (const img of product.images) {
-        if (img.id) {
-          await imageKitConfig.deleteFile(img.id);
+        console.log(img.fileId)
+        if (img.fileId) {
+          await imageKitConfig.deleteFile(img.fileId);
         }
       }
     }
+    console.log(1)
 
     // Delete product from DB
     await Product.findByIdAndDelete(productId);
+    console.log(1)
 
     return NextResponse.json({ message: 'Product and images deleted successfully' , status: 200 , success: true}, { status: 200 }, {success: true});
   } catch (error) {
