@@ -415,7 +415,7 @@ export default function SingleProductPage() {
               </div>
 
               {/* Price */}
-              <div className="mb-6 p-4 rounded-xl border border-[#D4AF37]">
+              <div className="mb-6 p-4 rounded-xl border border-[#D4AF37]/50">
                 <div className="flex items-baseline gap-3 mb-2">
                   {product.discountPrice ? (
                     <>
