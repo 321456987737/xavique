@@ -377,7 +377,7 @@ const EditProduct = () => {
         <div className="bg-[#111] rounded-lg  overflow-hidden">
           {/* Navigation Tabs */}
           <div className="border-b border-[#222]">
-            <nav className="flex -mb-px items-center">
+            {/* <nav className="flex -mb-px items-center">
               <button
                 onClick={() => setActiveTab("basic")}
                 className={`py-4 px-6 font-medium text-sm border-b-2 transition-colors ${activeTab === "basic" ? "border-[#D4AF37] text-[#D4AF37]" : "border-transparent text-[#888] hover:text-[#D4AF37]"}`}
@@ -416,7 +416,68 @@ const EditProduct = () => {
                   </>
                 )}
               </button>
-            </nav>
+            </nav> */}
+            <nav className="flex -mb-px items-center flex-wrap">
+  <button
+    onClick={() => setActiveTab("basic")}
+    className={`w-[100px] sm:w-[150px] md:w-[200px] py-2 sm:py-3 md:py-4 px-2 sm:px-4 md:px-6 font-medium text-xs sm:text-sm md:text-base border-b-2 transition-colors ${
+      activeTab === "basic"
+        ? "border-[#D4AF37] text-[#D4AF37]"
+        : "border-transparent text-[#888] hover:text-[#D4AF37]"
+    }`}
+  >
+    Basic Info
+  </button>
+
+  <button
+    onClick={() => setActiveTab("media")}
+    className={`w-[100px] sm:w-[150px] md:w-[200px] py-2 sm:py-3 md:py-4 px-2 sm:px-4 md:px-6 font-medium text-xs sm:text-sm md:text-base border-b-2 transition-colors ${
+      activeTab === "media"
+        ? "border-[#D4AF37] text-[#D4AF37]"
+        : "border-transparent text-[#888] hover:text-[#D4AF37]"
+    }`}
+  >
+    Media
+  </button>
+
+  <button
+    onClick={() => setActiveTab("inventory")}
+    className={`w-[100px] sm:w-[150px] md:w-[200px] py-2 sm:py-3 md:py-4 px-2 sm:px-4 md:px-6 font-medium text-xs sm:text-sm md:text-base border-b-2 transition-colors ${
+      activeTab === "inventory"
+        ? "border-[#D4AF37] text-[#D4AF37]"
+        : "border-transparent text-[#888] hover:text-[#D4AF37]"
+    }`}
+  >
+    Inventory
+  </button>
+
+  <button
+    onClick={() => setActiveTab("organization")}
+    className={`w-[100px] sm:w-[150px] md:w-[200px] py-2 sm:py-3 md:py-4 px-2 sm:px-4 md:px-6 font-medium text-xs sm:text-sm md:text-base border-b-2 transition-colors ${
+      activeTab === "organization"
+        ? "border-[#D4AF37] text-[#D4AF37]"
+        : "border-transparent text-[#888] hover:text-[#D4AF37]"
+    }`}
+  >
+    Organization
+  </button>
+
+  <button
+    onClick={() => handleDelete(product._id)}
+    className="ml-auto bg-red-600 hover:bg-red-700 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded flex items-center gap-2 text-xs sm:text-sm md:text-base"
+    disabled={isLoading}
+  >
+    {isLoading ? (
+      <Loader2 className="animate-spin w-4 h-4" />
+    ) : (
+      <>
+        <Trash2 className="w-4 h-4" />
+        Delete Product
+      </>
+    )}
+  </button>
+</nav>
+
           </div>
 
           <form onSubmit={handleSave} className="p-6">
@@ -492,7 +553,7 @@ const EditProduct = () => {
                         type="number"
                         value={product.discountPrice || ""}
                         onChange={handleChange}
-                        className="w-full bg-[#222] border border border-[#D4AF37]/50 border-[#333] rounded-lg pl-10 pr-4 py-3 text-[#F6F5F3] focus:outline-none focus:ring-2 focus:ring-[#D4AF37] transition-all"
+                        className="w-full bg-[#222]  border border-[#D4AF37]/50  rounded-lg pl-10 pr-4 py-3 text-[#F6F5F3] focus:outline-none focus:ring-2 focus:ring-[#D4AF37] transition-all"
                         min="0"
                         step="0.01"
                         placeholder="Optional"
@@ -598,7 +659,7 @@ const EditProduct = () => {
                       type="number"
                       value={product.stockQuantity}
                       onChange={handleChange}
-                      className="w-full border border-[#D4AF37]/50 bg-[#222] border border-[#333] rounded-lg px-4 py-3 text-[#F6F5F3] focus:outline-none focus:ring-2 focus:ring-[#D4AF37] transition-all"
+                      className="w-full  bg-[#222] border border-[#333] rounded-lg px-4 py-3 text-[#F6F5F3] focus:outline-none focus:ring-2 focus:ring-[#D4AF37] transition-all"
                       min="0"
                       required
                     />
@@ -613,7 +674,7 @@ const EditProduct = () => {
                       <button
                         type="button"
                         onClick={() => setShowSizes(!showSizes)}
-                        className="w-full bg-[#222] border border-[#333] border border-[#D4AF37]/50 rounded-lg px-4 py-3 text-left flex justify-between items-center hover:bg-[#1a1a1a] transition-colors"
+                        className="w-full bg-[#222]  border border-[#D4AF37]/50 rounded-lg px-4 py-3 text-left flex justify-between items-center hover:bg-[#1a1a1a] transition-colors"
                       >
                         <span className={product.sizes.length ? "text-[#F6F5F3]" : "text-[#888]"}>
                           {product.sizes.length > 0 
